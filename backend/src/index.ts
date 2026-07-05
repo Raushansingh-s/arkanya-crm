@@ -40,7 +40,7 @@ app.get('/', (req, res) => {
 app.get('/health', async (req, res) => {
   try {
     // Check database connection
-    await prisma.$queryRaw`SELECT 1`;
+    await prisma.$runCommandRaw({ ping: 1 });
     res.status(200).json({ status: 'healthy', database: 'connected' });
   } catch (error: any) {
     res.status(500).json({ status: 'unhealthy', error: error.message });
@@ -60,6 +60,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, async () => {
   console.log(`====================================================`);
   console.log(`🚀 Arkanya API Server running on: http://localhost:${PORT}`);
-  console.log(`📂 DB: SQLite dev.db initialized`);
+  console.log(`📂 DB: MongoDB database initialized`);
   console.log(`====================================================`);
 });

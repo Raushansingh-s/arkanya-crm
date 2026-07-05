@@ -1,6 +1,6 @@
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -9,7 +9,7 @@ generator client {
 
 // SaaS Tenant Configuration
 model Tenant {
-  id            String   @id @default(uuid())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   slug          String   @unique
   name          String
   logoUrl       String?
@@ -29,8 +29,8 @@ model Tenant {
 
 // User Profile for Staff, Admins, and Students
 model User {
-  id              String   @id @default(uuid())
-  tenantId        String
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId        String   @db.ObjectId
   email           String
   username        String
   passwordHash    String
@@ -53,8 +53,8 @@ model User {
 
 // Student Specific Information (Linked when role = STUDENT)
 model StudentProfile {
-  id                  String   @id @default(uuid())
-  userId              String   @unique
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId              String   @unique @db.ObjectId
   parentName          String?
   parentPhone         String?
   aadharNo            String?
@@ -91,8 +91,8 @@ model StudentProfile {
 
 // University Info
 model University {
-  id              String    @id @default(uuid())
-  tenantId        String
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId        String    @db.ObjectId
   name            String
   logoUrl         String?
   ugcApproved     Boolean   @default(true)
@@ -112,9 +112,9 @@ model University {
 
 // College Info
 model College {
-  id                  String          @id @default(uuid())
-  tenantId            String
-  universityId        String
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId            String          @db.ObjectId
+  universityId        String          @db.ObjectId
   name                String
   state               String
   district            String
@@ -141,8 +141,8 @@ model College {
 
 // Course details at a specific college
 model Course {
-  id              String      @id @default(uuid())
-  collegeId       String
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  collegeId       String      @db.ObjectId
   degree          String      // B.Tech, MBA, MBBS, BBA
   branch          String      // Computer Science, Finance, General Medicine
   eligibility     String?     // e.g. 12th with 60% PCM
@@ -161,9 +161,9 @@ model Course {
 
 // Collaboration and Agreement details between Agency and College
 model Collaboration {
-  id                String    @id @default(uuid())
-  tenantId          String
-  collegeId         String
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId          String    @db.ObjectId
+  collegeId         String    @db.ObjectId
   agreementUrl      String?
   startDate         DateTime
   expiryDate        DateTime
@@ -180,8 +180,8 @@ model Collaboration {
 
 // Leads / Student CRM Entries
 model Lead {
-  id                  String    @id @default(uuid())
-  tenantId            String
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId            String    @db.ObjectId
   name                String
   phone               String
   email               String
@@ -196,8 +196,8 @@ model Lead {
   source              String    @default("Website") // Website, Facebook, WhatsApp, Walk-in
   pipelineStage       String    @default("New") // New, Contacted, Interested, Counselling, DocPending, Applied, Verified, Confirmed, Lost
   leadScore           Int       @default(50) // 1-100 score calculated by AI
-  counsellorId        String?
-  creatorId           String?
+  counsellorId        String?   @db.ObjectId
+  creatorId           String?   @db.ObjectId
   notes               String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -210,8 +210,8 @@ model Lead {
 
 // Follow-ups scheduled for CRM Leads
 model FollowUp {
-  id          String   @id @default(uuid())
-  leadId      String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  leadId      String   @db.ObjectId
   dateTime    DateTime
   type        String   // Call, Meeting, Email, WhatsApp
   notes       String?
@@ -223,9 +223,9 @@ model FollowUp {
 
 // Financial Accounting and Commissions
 model Transaction {
-  id            String   @id @default(uuid())
-  tenantId      String
-  userId        String?  // Associated student or staff
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId      String   @db.ObjectId
+  userId        String?  @db.ObjectId // Associated student or staff
   type          String   // Income, Expense, Commission
   category      String   // Tuition, Consultation, Registration, Salary, Office
   amount        Float
@@ -242,7 +242,7 @@ model Transaction {
 
 // Audit Logs for System activity tracking
 model AuditLog {
-  id         String   @id @default(uuid())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
   userId     String?
   userName   String?
   action     String   // e.g. LOGIN, UPDATE_LEAD, UPLOAD_AGREEMENT

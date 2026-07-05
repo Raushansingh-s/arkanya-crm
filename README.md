@@ -8,7 +8,7 @@ An enterprise-grade, multi-tenant SaaS Admission Consultancy platform featuring 
 
 ```
 d:/New folder/
-├── backend/                  # REST APIs (Node, Express, TS, Prisma, SQLite)
+├── backend/                  # REST APIs (Node, Express, TS, Prisma, MongoDB)
 │   ├── src/
 │   │   ├── controllers/      # Route actions (Auth, CRM, ERP, Accounting, AI)
 │   │   ├── middleware/       # JWT token security & Role protection (RBAC)
@@ -37,7 +37,7 @@ To boot up the application, open two separate terminal shells:
 ### 1. Start Backend API Server
 ```bash
 cd backend
-# Database migrations & seeding (Pre-configured SQLite dev.db)
+# Database schema sync & seeding (Pre-configured MongoDB database)
 npx prisma generate
 npx prisma db push
 npm run prisma:seed

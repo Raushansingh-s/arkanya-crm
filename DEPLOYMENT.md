@@ -5,7 +5,7 @@ This document outlines the step-by-step procedure to deploy the Arkanya Edutech 
 ---
 
 ## 🏗️ Option A: Containerized Deployment (Recommended)
-This option uses **Docker** and **Docker Compose** to run the backend API server, React frontend bundle, and PostgreSQL database inside isolated containers.
+This option uses **Docker** and **Docker Compose** to run the backend API server, React frontend bundle, and MongoDB database inside isolated containers.
 
 ### Prerequisites
 * Install **Docker** and **Docker Compose** on the server.
@@ -69,18 +69,36 @@ server {
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
+  mongo:
+    image: mongo:6.0
     container_name: arkanya_db
     restart: always
-    environment:
-      POSTGRES_DB: arkanya_erp
-      POSTGRES_USER: arkanya_admin
-      POSTGRES_PASSWORD: SecureDbPassword123
     ports:
-      - "5432:5432"
+      - "27017:27017"
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping').ok", "--quiet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-init:
+    image: mongo:6.0
+    container_name: arkanya_db_init
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint: >
+      mongosh --host mongo:27017 --eval "
+        try {
+          rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] });
+          print('Replica set initialized successfully.');
+        } catch (e) {
+          print('Replica set already initialized or initialization failed: ' + e.message);
+        }
+      "
 
   backend:
     build: ./backend
@@ -89,11 +107,12 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: "postgresql://arkanya_admin:SecureDbPassword123@postgres:5432/arkanya_erp?schema=public"
+      DATABASE_URL: "mongodb://mongo:27017/arkanya_erp?replicaSet=rs0&directConnection=true"
       JWT_SECRET: "SuperSecureProductionJWTSecretKey998822!!"
       PORT: 5000
     depends_on:
-      - postgres
+      mongo:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -105,7 +124,7 @@ services:
       - backend
 
 volumes:
-  pgdata:
+  mongodata:
 ```
 
 ### Step 5: Launch the stack
@@ -136,7 +155,7 @@ sudo apt-get install nginx -y
 1. Navigate to `/backend`.
 2. Configure `.env`:
    ```env
-   DATABASE_URL="postgresql://user:pass@localhost:5432/dbname"
+    DATABASE_URL="mongodb://user:pass@localhost:27017/dbname?replicaSet=rs0&directConnection=true"
    JWT_SECRET="SuperSecureProductionJWTSecretKey998822!!"
    PORT=5000
    ```
