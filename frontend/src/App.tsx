@@ -137,6 +137,10 @@ interface Transaction {
   createdAt: string;
 }
 
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? ''
+  : ((import.meta as any).env?.VITE_API_URL || 'https://arkanya-backend.onrender.com');
+
 export default function App() {
   // Authentication & Tenant States
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('token'));
@@ -277,7 +281,7 @@ export default function App() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch('/api/auth/profile', {
+      const res = await fetch(`${API_URL}/api/auth/profile`, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.ok) {
@@ -301,13 +305,13 @@ export default function App() {
       const headers = { Authorization: `Bearer ${authToken}` };
       
       const [leadsRes, uniRes, colRes, collabsRes, txRes, pnlRes, statsRes] = await Promise.all([
-        fetch('/api/crm/leads', { headers }),
-        fetch('/api/erp/universities', { headers }),
-        fetch('/api/erp/colleges', { headers }),
-        fetch('/api/erp/collaborations', { headers }),
-        fetch('/api/accounting/transactions', { headers }),
-        fetch('/api/accounting/profit-loss', { headers }),
-        fetch('/api/crm/stats', { headers })
+        fetch(`${API_URL}/api/crm/leads`, { headers }),
+        fetch(`${API_URL}/api/erp/universities`, { headers }),
+        fetch(`${API_URL}/api/erp/colleges`, { headers }),
+        fetch(`${API_URL}/api/erp/collaborations`, { headers }),
+        fetch(`${API_URL}/api/accounting/transactions`, { headers }),
+        fetch(`${API_URL}/api/accounting/profit-loss`, { headers }),
+        fetch(`${API_URL}/api/crm/stats`, { headers })
       ]);
 
       if (leadsRes.ok) setLeads(await leadsRes.json());
@@ -328,7 +332,7 @@ export default function App() {
     setLoginError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,7 +341,7 @@ export default function App() {
           tenantSlug: tenantSlugInput
         })
       });
-
+      
       const data = await res.json();
 
       if (res.ok) {
@@ -391,7 +395,7 @@ export default function App() {
     // Simulate submitting login
     setIsLoggingIn(true);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
