@@ -1,0 +1,252 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SaaS Tenant Configuration
+model Tenant {
+  id            String   @id @default(uuid())
+  slug          String   @unique
+  name          String
+  logoUrl       String?
+  domain        String?  @unique
+  primaryColor  String   @default("#0f172a") // Tailwind slate-900
+  accentColor   String   @default("#3b82f6") // Tailwind blue-500
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users         User[]
+  universities  University[]
+  colleges      College[]
+  leads         Lead[]
+  transactions  Transaction[]
+  agreements    Collaboration[]
+}
+
+// User Profile for Staff, Admins, and Students
+model User {
+  id              String   @id @default(uuid())
+  tenantId        String
+  email           String
+  username        String
+  passwordHash    String
+  role            String   // SUPERADMIN, DIRECTOR_FINANCE, DIRECTOR_ACADEMICS, DIRECTOR_LEGAL, COUNSELLOR, TELECALLER, ACCOUNTANT, STUDENT, etc.
+  phone           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Relations depending on roles
+  studentProfile  StudentProfile?
+  assignedLeads   Lead[]           @relation("AssignedCounsellor")
+  createdLeads    Lead[]           @relation("LeadCreator")
+  transactions    Transaction[]
+
+  @@unique([tenantId, email])
+}
+
+// Student Specific Information (Linked when role = STUDENT)
+model StudentProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  parentName          String?
+  parentPhone         String?
+  aadharNo            String?
+  panNo               String?
+  category            String   @default("General") // General, OBC, SC, ST, EWS
+  qualification10th   Float?   // Percentage
+  qualification12th   Float?   // Percentage
+  qualificationGrad   Float?   // Percentage (if applicable)
+  preferredCourse     String?
+  preferredCollege    String?
+  budgetLimit         Float?
+  walletBalance       Float    @default(0.0)
+  
+  // Verification statuses of uploaded documents
+  doc10thStatus       String   @default("Pending") // Pending, Approved, Rejected
+  doc12thStatus       String   @default("Pending")
+  docGradStatus       String   @default("Pending")
+  docAadharStatus     String   @default("Pending")
+  docPANStatus        String   @default("Pending")
+  docPhotoStatus      String   @default("Pending")
+  docSignatureStatus  String   @default("Pending")
+
+  // Documents Local/S3 URLs
+  doc10thUrl          String?
+  doc12thUrl          String?
+  docGradUrl          String?
+  docAadharUrl        String?
+  docPANUrl           String?
+  docPhotoUrl         String?
+  docSignatureUrl     String?
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// University Info
+model University {
+  id              String    @id @default(uuid())
+  tenantId        String
+  name            String
+  logoUrl         String?
+  ugcApproved     Boolean   @default(true)
+  aicteApproved   Boolean   @default(false)
+  naacGrade       String?   // A++, A+, A, B
+  nirfRanking     Int?
+  website         String?
+  email           String?
+  phone           String?
+  state           String
+  city            String
+  createdAt       DateTime  @default(now())
+
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  colleges        College[]
+}
+
+// College Info
+model College {
+  id                  String          @id @default(uuid())
+  tenantId            String
+  universityId        String
+  name                String
+  state               String
+  district            String
+  address             String
+  contactPerson       String?
+  phone               String?
+  email               String?
+  website             String?
+  naacGrade           String?
+  aicteApproved       Boolean         @default(true)
+  ugcApproved         Boolean         @default(true)
+  ranking             Int?
+  hostelDetails       String?
+  placementStats      String?         // JSON or Text description
+  highestPackage      Float?          // in LPA
+  averagePackage      Float?          // in LPA
+  infrastructureNotes String?
+  
+  tenant              Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  university          University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  courses             Course[]
+  collaborations      Collaboration[]
+}
+
+// Course details at a specific college
+model Course {
+  id              String      @id @default(uuid())
+  collegeId       String
+  degree          String      // B.Tech, MBA, MBBS, BBA
+  branch          String      // Computer Science, Finance, General Medicine
+  eligibility     String?     // e.g. 12th with 60% PCM
+  durationYears   Int
+  totalFees       Float
+  semesterFees    Float
+  registrationFees Float       @default(0.0)
+  examFees        Float       @default(0.0)
+  hostelFees      Float       @default(0.0)
+  seatsTotal      Int         @default(60)
+  seatsBooked     Int         @default(0)
+  seatsWaiting    Int         @default(0)
+
+  college         College     @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+// Collaboration and Agreement details between Agency and College
+model Collaboration {
+  id                String    @id @default(uuid())
+  tenantId          String
+  collegeId         String
+  agreementUrl      String?
+  startDate         DateTime
+  expiryDate        DateTime
+  commissionPercent Float     @default(0.0) // e.g. 15.0 for 15%
+  fixedCommission   Float     @default(0.0) // Flat referral payout
+  admissionContact  String?
+  paymentTerms      String?
+  status            String    @default("Active") // Active, Expired, Terminated
+  notes             String?
+
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  college           College   @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+// Leads / Student CRM Entries
+model Lead {
+  id                  String    @id @default(uuid())
+  tenantId            String
+  name                String
+  phone               String
+  email               String
+  parentName          String?
+  state               String?
+  city                String?
+  qualification       String?
+  marksPercentage     Float?
+  preferredCourse     String?
+  preferredCollege    String?
+  budget              Float?
+  source              String    @default("Website") // Website, Facebook, WhatsApp, Walk-in
+  pipelineStage       String    @default("New") // New, Contacted, Interested, Counselling, DocPending, Applied, Verified, Confirmed, Lost
+  leadScore           Int       @default(50) // 1-100 score calculated by AI
+  counsellorId        String?
+  creatorId           String?
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  tenant              Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  counsellor          User?     @relation("AssignedCounsellor", fields: [counsellorId], references: [id])
+  creator             User?     @relation("LeadCreator", fields: [creatorId], references: [id])
+  followups           FollowUp[]
+}
+
+// Follow-ups scheduled for CRM Leads
+model FollowUp {
+  id          String   @id @default(uuid())
+  leadId      String
+  dateTime    DateTime
+  type        String   // Call, Meeting, Email, WhatsApp
+  notes       String?
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+// Financial Accounting and Commissions
+model Transaction {
+  id            String   @id @default(uuid())
+  tenantId      String
+  userId        String?  // Associated student or staff
+  type          String   // Income, Expense, Commission
+  category      String   // Tuition, Consultation, Registration, Salary, Office
+  amount        Float
+  gstAmount     Float    @default(0.0)
+  invoiceNumber String?
+  paymentStatus String   @default("Pending") // Pending, Completed, Refunded
+  paymentMethod String   @default("Bank Transfer") // Razorpay, Cash, Bank Transfer
+  description   String?
+  createdAt     DateTime @default(now())
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// Audit Logs for System activity tracking
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  userName   String?
+  action     String   // e.g. LOGIN, UPDATE_LEAD, UPLOAD_AGREEMENT
+  details    String?  // JSON description
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}

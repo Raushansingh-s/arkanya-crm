@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: arkanya_db
+    restart: always
+    environment:
+      POSTGRES_DB: arkanya_erp
+      POSTGRES_USER: arkanya_admin
+      POSTGRES_PASSWORD: SecureDbPassword123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: arkanya_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: "postgresql://arkanya_admin:SecureDbPassword123@postgres:5432/arkanya_erp?schema=public"
+      JWT_SECRET: "SuperSecureProductionJWTSecretKey998822!!"
+      PORT: 5000
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    container_name: arkanya_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
