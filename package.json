@@ -2,6 +2,7 @@
   "name": "arkanya-root",
   "private": true,
   "scripts": {
+    "prebuild": "npm install --prefix frontend",
     "build": "npm run build --prefix frontend",
     "install-all": "npm install --prefix frontend && npm install --prefix backend",
     "backend-build": "npm run build --prefix backend",
