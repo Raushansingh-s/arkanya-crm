@@ -195,6 +195,7 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
       updatedAt,
       counsellor,
       followups,
+      studentProfile,
       ...updateData
     } = data;
 

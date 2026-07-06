@@ -424,7 +424,7 @@ export default function App() {
   // CRM: Update Full Lead Profile
   const updateLeadDetails = async (leadId: string, updatedFields: any) => {
     try {
-      const { id, counsellor, followups, createdAt, updatedAt, ...sanitized } = updatedFields;
+      const { id, counsellor, followups, studentProfile, createdAt, updatedAt, ...sanitized } = updatedFields;
       const res = await fetch(`${API_URL}/api/crm/leads/${leadId}`, {
         method: 'PATCH',
         headers: {
