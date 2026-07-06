@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, School, FileText, CheckSquare, MessageSquare, AlertTriangle, ShieldCheck, 
   Search, Sun, Moon, LayoutDashboard, Kanban, DollarSign, BarChart3, 
-  Send, Sparkles, UserPlus, LogOut, CheckCircle2, XCircle, Clock, FileBadge, Download, 
+  Send, Sparkles, UserPlus, LogOut, CheckCircle2, XCircle, Clock, Download, 
   QrCode, Upload, Eye, UserCheck, Settings, Globe, PlusCircle, Edit3,
   Building2, MapPin, Phone, Mail, Link, Award, Home, Briefcase,
   TrendingUp, ArrowLeft, GraduationCap
@@ -1516,9 +1516,6 @@ export default function App() {
           {/* Admissions Section */}
           <NavSection label="Admissions" />
           <NavBtn tab="crm" icon={<Kanban size={15} />} label="Lead CRM" />
-          <NavBtn tab="follow-ups" icon={<Clock size={15} />} label="Follow Ups" />
-          <NavBtn tab="counselling" icon={<Users size={15} />} label="Counselling" />
-          <NavBtn tab="admissions" icon={<FileBadge size={15} />} label="Admissions" />
           <NavBtn tab="students" icon={<GraduationCap size={15} />} label="Students" />
 
           {/* Institutions Section */}
