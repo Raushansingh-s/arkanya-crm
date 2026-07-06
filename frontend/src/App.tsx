@@ -1590,10 +1590,28 @@ export default function App() {
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
-                                    <button className="text-[10px] font-bold px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1">
+                                    <button 
+                                      onClick={() => {
+                                        const lead = leads.find(l => l.id === student.id);
+                                        if (lead) {
+                                          setSelectedLead(lead);
+                                          setShowLeadModal(true);
+                                        }
+                                      }}
+                                      className="text-[10px] font-bold px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1"
+                                    >
                                       <Eye size={11} /> View
                                     </button>
-                                    <button className="text-[10px] font-bold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg flex items-center gap-1">
+                                    <button 
+                                      onClick={() => {
+                                        const lead = leads.find(l => l.id === student.id);
+                                        if (lead) {
+                                          setSelectedLead(lead);
+                                          setShowLeadModal(true);
+                                        }
+                                      }}
+                                      className="text-[10px] font-bold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg flex items-center gap-1"
+                                    >
                                       <Edit3 size={11} /> Edit
                                     </button>
                                   </div>
