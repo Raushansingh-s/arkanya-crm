@@ -244,9 +244,9 @@ export default function App() {
 
   // Forms & Filter inputs
   const [searchQuery, setSearchQuery] = useState('');
-  const [tenantSlugInput, setTenantSlugInput] = useState('arkanya');
-  const [loginEmail, setLoginEmail] = useState('admin@arkanya.in');
-  const [loginPassword, setLoginPassword] = useState('password123');
+  const [tenantSlugInput, setTenantSlugInput] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
 
@@ -416,56 +416,6 @@ export default function App() {
     setActiveTab('dashboard');
   };
 
-  // Helper for quick login / role switching
-  const quickLoginAs = async (role: string) => {
-    let email = 'admin@arkanya.in';
-    if (role === 'DIRECTOR_FINANCE') email = 'finance.director@arkanya.in';
-    else if (role === 'DIRECTOR_ACADEMICS') email = 'marketing.director@arkanya.in';
-    else if (role === 'DIRECTOR_LEGAL') email = 'legal.director@arkanya.in';
-    else if (role === 'COUNSELLOR') email = 'counsellor1@arkanya.in';
-    else if (role === 'ACCOUNTANT') email = 'accountant@arkanya.in';
-    else if (role === 'STUDENT') email = 'student@arkanya.in';
-
-    setLoginEmail(email);
-    setLoginPassword('password123');
-    setTenantSlugInput('arkanya');
-    
-    // Simulate submitting login
-    setIsLoggingIn(true);
-    try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password: 'password123',
-          tenantSlug: 'arkanya'
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        setAuthToken(data.token);
-        setCurrentUser(data.user);
-        setCurrentTenant(data.tenant);
-        const roleDefaultTab: Record<string, string> = {
-          SUPERADMIN: 'dashboard',
-          DIRECTOR_ACADEMICS: 'dashboard',
-          DIRECTOR_FINANCE: 'accounting',
-          DIRECTOR_LEGAL: 'agreements',
-          COUNSELLOR: 'crm',
-          ACCOUNTANT: 'accounting',
-          STUDENT: 'student-portal',
-        };
-        setActiveTab(roleDefaultTab[data.user.role] || 'dashboard');
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
 
 
 
@@ -944,30 +894,6 @@ export default function App() {
 
           <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/10 rounded-lg text-[10.5px] text-slate-400 leading-relaxed">
             🎓 <strong>Student Portal Login Info:</strong> If you are an enrolled student, log in with your registered email, workspace <code>arkanya</code>, and the default password <code>password123</code>.
-          </div>
-
-          <div className="mt-6 border-t border-slate-900 pt-6">
-            <h3 className="text-xs font-semibold text-slate-400 mb-3 text-center">EXAMINER EVALUATION SHORTCUTS</h3>
-            <div className="grid grid-cols-2 gap-2 text-center text-xs font-medium text-slate-200">
-              <button onClick={() => quickLoginAs('SUPERADMIN')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
-                Super Admin
-              </button>
-              <button onClick={() => quickLoginAs('DIRECTOR_FINANCE')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
-                Dir: Finance & ERP
-              </button>
-              <button onClick={() => quickLoginAs('DIRECTOR_ACADEMICS')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
-                Dir: Admissions
-              </button>
-              <button onClick={() => quickLoginAs('DIRECTOR_LEGAL')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
-                Dir: Legal Contracts
-              </button>
-              <button onClick={() => quickLoginAs('COUNSELLOR')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
-                Counsellor Panel
-              </button>
-              <button onClick={() => quickLoginAs('STUDENT')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
-                Student Portal
-              </button>
-            </div>
           </div>
         </div>
       </div>
