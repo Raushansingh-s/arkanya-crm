@@ -198,6 +198,8 @@ model Lead {
   leadScore           Int       @default(50) // 1-100 score calculated by AI
   counsellorId        String?   @db.ObjectId
   creatorId           String?   @db.ObjectId
+  docStatus           String    @default("Pending") // Pending, Under Review, Verified
+  feeStatus           String    @default("Pending") // Paid, Pending
   notes               String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt

@@ -47,6 +47,8 @@ interface Lead {
   pipelineStage: string;
   leadScore: number;
   counsellorId?: string;
+  docStatus?: string;
+  feeStatus?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -429,23 +431,28 @@ export default function App() {
     }
   };
 
-  // CRM: Update Lead Stage
-  const moveLeadStage = async (leadId: string, newStage: string) => {
+
+
+  // CRM: Update Full Lead Profile
+  const updateLeadDetails = async (leadId: string, updatedFields: any) => {
     try {
-      const res = await fetch(`${API_URL}/api/crm/leads/${leadId}/stage`, {
+      const res = await fetch(`${API_URL}/api/crm/leads/${leadId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`
         },
-        body: JSON.stringify({ stage: newStage })
+        body: JSON.stringify(updatedFields)
       });
       if (res.ok) {
-        // Refresh local leads list
         fetchMasterData();
+        setShowLeadModal(false);
+      } else {
+        const err = await res.json();
+        alert(`Error updating profile: ${err.error}`);
       }
     } catch (e) {
-      console.error('Error updating stage', e);
+      console.error('Error updating lead details:', e);
     }
   };
 
@@ -1510,12 +1517,12 @@ export default function App() {
 
               {/* Summary Stats */}
               {(() => {
-                const enrolledStudents = leads.filter(l => l.pipelineStage === 'Confirmed').map((l, i) => ({
+                const enrolledStudents = leads.filter(l => l.pipelineStage === 'Confirmed').map((l) => ({
                   id: l.id, name: l.name, email: l.email, phone: l.phone,
                   course: l.preferredCourse || 'N/A', college: l.preferredCollege || 'N/A',
                   counsellor: l.counsellor?.username || 'Aditi Sharma',
-                  docStatus: i % 3 === 0 ? 'Pending' : i % 3 === 1 ? 'Under Review' : 'Verified',
-                  feeStatus: i % 2 === 0 ? 'Paid' : 'Pending',
+                  docStatus: l.docStatus || 'Pending',
+                  feeStatus: l.feeStatus || 'Pending',
                   stage: 'Enrolled',
                 }));
 
@@ -3292,29 +3299,163 @@ export default function App() {
 
       {/* LEAD DETAILS EDIT MODAL */}
       {showLeadModal && selectedLead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
+          <div className="w-full max-w-2xl bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-8">
             <div className="flex justify-between items-start border-b pb-3">
               <div>
-                <h3 className="text-base font-extrabold text-slate-950 dark:text-slate-100">{selectedLead.name}</h3>
-                <span className="text-xs text-slate-400">{selectedLead.email} • {selectedLead.phone}</span>
+                <h3 className="text-base font-extrabold text-slate-950 dark:text-slate-100">Student Profile: {selectedLead.name}</h3>
+                <span className="text-xs text-slate-400">ID: {selectedLead.id}</span>
               </div>
               <button onClick={() => setShowLeadModal(false)} className="text-slate-400 hover:text-white">
                 <XCircle size={20} />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-semibold">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+              {/* Column 1: Personal Details */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Personal & Contact Info</h4>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase">Change Pipeline stage</span>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
+                  <input 
+                    type="text" 
+                    value={selectedLead.name} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, name: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={selectedLead.email} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
+                  <input 
+                    type="text" 
+                    value={selectedLead.phone} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Parent's Name</label>
+                  <input 
+                    type="text" 
+                    value={selectedLead.parentName || ''} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, parentName: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">State</label>
+                    <input 
+                      type="text" 
+                      value={selectedLead.state || ''} 
+                      onChange={(e) => setSelectedLead({ ...selectedLead, state: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">City</label>
+                    <input 
+                      type="text" 
+                      value={selectedLead.city || ''} 
+                      onChange={(e) => setSelectedLead({ ...selectedLead, city: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 2: Academic & Workflow Details */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Enrolment Settings</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
+                    <input 
+                      type="text" 
+                      value={selectedLead.qualification || ''} 
+                      onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      placeholder="e.g. 12th Pass"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Marks %</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      value={selectedLead.marksPercentage || ''} 
+                      onChange={(e) => setSelectedLead({ ...selectedLead, marksPercentage: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred Course</label>
+                  <input 
+                    type="text" 
+                    value={selectedLead.preferredCourse || ''} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred College</label>
+                  <input 
+                    type="text" 
+                    value={selectedLead.preferredCollege || ''} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, preferredCollege: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Budget Limit</label>
+                    <input 
+                      type="number" 
+                      value={selectedLead.budget || ''} 
+                      onChange={(e) => setSelectedLead({ ...selectedLead, budget: e.target.value ? parseFloat(e.target.value) : undefined })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Lead Source</label>
+                    <select
+                      value={selectedLead.source}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, source: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal"
+                    >
+                      <option value="Website">Website</option>
+                      <option value="Facebook">Facebook</option>
+                      <option value="WhatsApp">WhatsApp</option>
+                      <option value="Walk-in">Walk-in</option>
+                      <option value="Google">Google</option>
+                      <option value="Referral">Referral</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Workflow Settings */}
+            <div className="space-y-3 text-xs font-semibold border-t pt-3">
+              <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Workflow, Documents & Fees</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Pipeline Stage</label>
                   <select 
                     value={selectedLead.pipelineStage}
-                    onChange={(e) => {
-                      moveLeadStage(selectedLead.id, e.target.value);
-                      setSelectedLead({ ...selectedLead, pipelineStage: e.target.value });
-                    }}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none mt-1"
+                    onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
                   >
                     <option value="New">New Inquiries</option>
                     <option value="Counselling">Under Counselling</option>
@@ -3325,29 +3466,58 @@ export default function App() {
                 </div>
 
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase block">AI Lead Priority Score</span>
-                  <span className="text-sm font-extrabold text-blue-500 block mt-2.5">
-                    {selectedLead.leadScore} / 100 ({selectedLead.leadScore > 80 ? 'High Chance' : selectedLead.leadScore > 50 ? 'Medium Chance' : 'Low Conversion Chance'})
-                  </span>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Document Status</label>
+                  <select 
+                    value={selectedLead.docStatus || 'Pending'}
+                    onChange={(e) => setSelectedLead({ ...selectedLead, docStatus: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Verified">Verified</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Fee Status</label>
+                  <select 
+                    value={selectedLead.feeStatus || 'Pending'}
+                    onChange={(e) => setSelectedLead({ ...selectedLead, feeStatus: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block">Preferred College Details</span>
-                <p className="text-slate-800 dark:text-slate-200 mt-1">{selectedLead.preferredCollege || 'Not Specified'}</p>
-              </div>
+            {/* Interaction Notes */}
+            <div className="space-y-1 text-xs font-semibold">
+              <label className="block text-[10px] text-slate-400 uppercase">Counsellor Interaction Logs / Notes</label>
+              <textarea 
+                value={selectedLead.notes || ''} 
+                onChange={(e) => setSelectedLead({ ...selectedLead, notes: e.target.value })}
+                rows={3}
+                className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-lg focus:outline-none focus:border-blue-500 font-normal leading-relaxed"
+                placeholder="Enter interaction history, student details, etc..."
+              />
+            </div>
 
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block">Course & Budget</span>
-                <p className="text-slate-800 dark:text-slate-200 mt-1">{selectedLead.preferredCourse || 'Not Specified'} • ₹{(selectedLead.budget || 0).toLocaleString('en-IN')}</p>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block">Counsellor Interaction Logs / Notes</span>
-                <p className="text-slate-500 font-normal leading-relaxed mt-1 whitespace-pre-wrap bg-slate-100/50 dark:bg-slate-900/50 border p-3 rounded-lg">
-                  {selectedLead.notes || 'No follow-up call history logs compiled.'}
-                </p>
-              </div>
+            {/* Save Button */}
+            <div className="flex justify-end gap-3 border-t pt-3">
+              <button 
+                onClick={() => setShowLeadModal(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-xl transition"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition"
+              >
+                Save Changes
+              </button>
             </div>
           </div>
         </div>
