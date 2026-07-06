@@ -76,7 +76,18 @@ export async function getLeads(req: AuthenticatedRequest, res: Response) {
       orderBy: { updatedAt: 'desc' }
     });
 
-    return res.status(200).json(leads);
+    const leadsWithProfiles = await Promise.all(leads.map(async (lead) => {
+      const user = await prisma.user.findFirst({
+        where: { email: lead.email, tenantId: lead.tenantId },
+        include: { studentProfile: true }
+      });
+      return {
+        ...lead,
+        studentProfile: user?.studentProfile || null
+      };
+    }));
+
+    return res.status(200).json(leadsWithProfiles);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }

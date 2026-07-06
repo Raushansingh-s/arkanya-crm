@@ -16,6 +16,7 @@ router.post('/auth/register', authController.registerStudent);
 router.get('/auth/profile', authenticateJWT, authController.getProfile);
 router.post('/auth/otp/send', authController.sendOTP);
 router.post('/auth/otp/verify', authController.verifyOTP);
+router.post('/auth/upload-doc', authenticateJWT, authController.uploadDocument);
 
 // EMPLOYEE / USER MANAGEMENT ROUTES
 router.get('/users', authenticateJWT, requireRoles(['SUPERADMIN']), authController.getUsers);

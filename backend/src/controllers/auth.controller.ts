@@ -384,3 +384,110 @@ export async function resetUserPassword(req: AuthenticatedRequest, res: Response
     return res.status(500).json({ error: error.message });
   }
 }
+
+export async function uploadDocument(req: AuthenticatedRequest, res: Response) {
+  try {
+    const requesterId = req.user?.id;
+    const requesterRole = req.user?.role;
+    if (!requesterId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { fieldName, fileName, fileData, leadId } = req.body;
+    if (!fieldName || !fileName || !fileData) {
+      return res.status(400).json({ error: 'fieldName, fileName, and fileData (base64) are required' });
+    }
+
+    let targetUserId = requesterId;
+
+    // If leadId is provided and the requester is an admin/counsellor, find the corresponding student user
+    if (leadId && ['SUPERADMIN', 'ADMIN', 'COUNSELLOR', 'MARKETING_DIRECTOR', 'FINANCE_DIRECTOR'].includes(requesterRole || '')) {
+      const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+      if (!lead) {
+        return res.status(404).json({ error: 'Lead not found' });
+      }
+      const studentUser = await prisma.user.findFirst({
+        where: { email: lead.email, tenantId: lead.tenantId }
+      });
+      if (!studentUser) {
+        return res.status(400).json({ error: 'No student user account exists for this lead yet. Stage must be moved to Counselling/DocPending first.' });
+      }
+      targetUserId = studentUser.id;
+    }
+
+    const fs = await import('fs');
+    const path = await import('path');
+
+    // Ensure uploads folder exists
+    const uploadsDir = path.join(__dirname, '../../uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // Decode base64 data
+    const base64Data = fileData.replace(/^data:.*;base64,/, "");
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const uniqueFileName = `${Date.now()}-${targetUserId}-${fileName.replace(/\s+/g, '_')}`;
+    const filePath = path.join(uploadsDir, uniqueFileName);
+
+    // Save file to disk
+    fs.writeFileSync(filePath, buffer);
+
+    const fileUrl = `/uploads/${uniqueFileName}`;
+
+    // Map the fieldName to DB fields
+    const fieldMap: Record<string, { urlField: string; statusField: string }> = {
+      marksheet10: { urlField: 'doc10thUrl', statusField: 'doc10thStatus' },
+      marksheet12: { urlField: 'doc12thUrl', statusField: 'doc12thStatus' },
+      aadhar: { urlField: 'docAadharUrl', statusField: 'docAadharStatus' },
+      passport: { urlField: 'docPhotoUrl', statusField: 'docPhotoStatus' },
+      casteCert: { urlField: 'docGradUrl', statusField: 'docGradStatus' },
+      migCert: { urlField: 'docSignatureUrl', statusField: 'docSignatureStatus' },
+    };
+
+    const mapped = fieldMap[fieldName];
+    if (mapped) {
+      // Ensure student profile exists
+      let profile = await prisma.studentProfile.findUnique({ where: { userId: targetUserId } });
+      if (!profile) {
+        // Auto-create profile if missing
+        profile = await prisma.studentProfile.create({
+          data: {
+            userId: targetUserId,
+            doc10thStatus: 'Pending',
+            doc12thStatus: 'Pending',
+            docGradStatus: 'Pending',
+            docAadharStatus: 'Pending',
+            docPANStatus: 'Pending',
+            docPhotoStatus: 'Pending',
+            docSignatureStatus: 'Pending',
+          }
+        });
+      }
+
+      await prisma.studentProfile.update({
+        where: { userId: targetUserId },
+        data: {
+          [mapped.urlField]: fileUrl,
+          [mapped.statusField]: 'Under Review',
+        }
+      });
+    }
+
+    // Update corresponding lead in CRM to 'Under Review' status
+    const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+    if (targetUser) {
+      const lead = await prisma.lead.findFirst({ where: { email: targetUser.email, tenantId: targetUser.tenantId } });
+      if (lead) {
+        await prisma.lead.update({
+          where: { id: lead.id },
+          data: { docStatus: 'Under Review' }
+        });
+      }
+    }
+
+    return res.status(200).json({ message: 'Document uploaded successfully', url: fileUrl });
+  } catch (error: any) {
+    console.error('Error uploading document:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}

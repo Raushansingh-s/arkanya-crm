@@ -56,6 +56,7 @@ interface Lead {
   updatedAt: string;
   counsellor?: { username: string };
   followups?: FollowUp[];
+  studentProfile?: any;
 }
 
 interface FollowUp {
@@ -444,25 +445,6 @@ export default function App() {
     }
   };
 
-  // Student Profile: Update own lead record from student portal
-  const updateStudentLead = async (leadId: string, updatedFields: any) => {
-    try {
-      const { id, counsellor, followups, createdAt, updatedAt, ...sanitized } = updatedFields;
-      const res = await fetch(`${API_URL}/api/crm/leads/${leadId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`
-        },
-        body: JSON.stringify(sanitized)
-      });
-      if (res.ok) {
-        fetchProfile();
-      }
-    } catch (e) {
-      console.error('Error updating student lead:', e);
-    }
-  };
 
   // CRM: Create New Lead
   const handleCreateLead = async (e: React.FormEvent) => {
@@ -632,26 +614,82 @@ export default function App() {
     }
   };
 
-  // Student Document Upload Simulator
-  const simulateDocumentUpload = (docField: string) => {
-    setUploadProgress(prev => ({ ...prev, [docField]: 'Uploading' }));
-    
-    setTimeout(() => {
-      setUploadProgress(prev => ({ ...prev, [docField]: 'Completed' }));
-      // Highlight update
-      if (studentProfileData) {
-        setStudentProfileData((prev: any) => ({
-          ...prev,
-          [`${docField}Status`]: 'Approved',
-          [`${docField}Url`]: 'https://example.com/uploaded-doc.pdf'
-        }));
+  // Real Document Upload Handler
+  const handleRealDocumentUpload = (docField: string, leadId?: string) => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.jpg,.jpeg,.png';
+
+    fileInput.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size exceeds the limit of 2MB.');
+        return;
       }
 
-      // Update lead docStatus to 'Under Review' in the database
-      if (currentUser?.lead) {
-        updateStudentLead(currentUser.lead.id, { docStatus: 'Under Review' });
-      }
-    }, 1500);
+      setUploadProgress(prev => ({ ...prev, [docField]: 'Uploading' }));
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+
+        try {
+          const res = await fetch(`${API_URL}/api/auth/upload-doc`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+              fieldName: docField,
+              fileName: file.name,
+              fileData: base64Data,
+              leadId: leadId
+            })
+          });
+
+          if (res.ok) {
+            setUploadProgress(prev => ({ ...prev, [docField]: 'Completed' }));
+            alert('Document uploaded successfully!');
+            fetchProfile();
+            fetchMasterData();
+            // If editing a lead, update the modal lead reference
+            if (leadId && selectedLead && selectedLead.id === leadId) {
+              // Fetch leads list to sync with modal
+              const leadsRes = await fetch(`${API_URL}/api/crm/leads`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+              });
+              if (leadsRes.ok) {
+                const leadsList = await leadsRes.json();
+                const freshLead = leadsList.find((l: any) => l.id === leadId);
+                if (freshLead) {
+                  setSelectedLead(freshLead);
+                }
+              }
+            }
+          } else {
+            const err = await res.json();
+            alert(`Upload failed: ${err.error || 'Unknown error'}`);
+            setUploadProgress(prev => ({ ...prev, [docField]: 'Failed' }));
+          }
+        } catch (error) {
+          console.error('Error uploading document:', error);
+          alert('Failed to connect to the server.');
+          setUploadProgress(prev => ({ ...prev, [docField]: 'Failed' }));
+        }
+      };
+
+      reader.onerror = () => {
+        alert('Failed to read file.');
+        setUploadProgress(prev => ({ ...prev, [docField]: 'Failed' }));
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    fileInput.click();
   };
 
   // PDF & Document Generation engine
@@ -1814,23 +1852,15 @@ export default function App() {
             <div className="space-y-5">
               <div className="glass-card p-5 rounded-2xl border border-slate-200/40 dark:border-slate-800/30">
                 {(() => {
-                  const lead = currentUser.lead;
-                  const docStatus = lead?.docStatus || 'Pending';
+                  const profile = studentProfileData || {};
                   
-                  // Map database docStatus to individual document statuses
-                  const getStatus = (req: boolean) => {
-                    if (docStatus === 'Verified') return 'Approved';
-                    if (docStatus === 'Under Review') return req ? 'Under Review' : 'Pending Upload';
-                    return req ? 'Pending Upload' : 'Pending Upload';
-                  };
-
                   const docs = [
-                    { field: 'marksheet10', label: '10th Marksheet', status: getStatus(true), required: true },
-                    { field: 'marksheet12', label: '12th Marksheet / Diploma', status: getStatus(true), required: true },
-                    { field: 'aadhar', label: 'Aadhar Card', status: getStatus(true), required: true },
-                    { field: 'passport', label: 'Passport Photo', status: getStatus(true), required: true },
-                    { field: 'casteCert', label: 'Caste Certificate', status: getStatus(false), required: false },
-                    { field: 'migCert', label: 'Migration Certificate', status: getStatus(true), required: true },
+                    { field: 'marksheet10', label: '10th Marksheet', status: profile.doc10thStatus || 'Pending', url: profile.doc10thUrl, required: true },
+                    { field: 'marksheet12', label: '12th Marksheet / Diploma', status: profile.doc12thStatus || 'Pending', url: profile.doc12thUrl, required: true },
+                    { field: 'aadhar', label: 'Aadhar Card', status: profile.docAadharStatus || 'Pending', url: profile.docAadharUrl, required: true },
+                    { field: 'passport', label: 'Passport Photo', status: profile.docPhotoStatus || 'Pending', url: profile.docPhotoUrl, required: true },
+                    { field: 'casteCert', label: 'Caste Certificate', status: profile.docGradStatus || 'Pending', url: profile.docGradUrl, required: false },
+                    { field: 'migCert', label: 'Migration Certificate', status: profile.docSignatureStatus || 'Pending', url: profile.docSignatureUrl, required: true },
                   ];
 
                   const verifiedCount = docs.filter(d => d.status === 'Approved').length;
@@ -1845,35 +1875,47 @@ export default function App() {
                       </div>
                       <div className="space-y-3">
                         {docs.map(doc => {
-                    const isApproved = doc.status === 'Approved';
-                    const isReview = doc.status === 'Under Review';
-                    const uploading = uploadProgress[doc.field] === 'Uploading';
-                    return (
-                      <div key={doc.field} className="flex items-center justify-between p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-slate-100/30 dark:bg-slate-900/30">
-                        <div className="flex items-center gap-3">
-                          {isApproved ? <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" /> :
-                           isReview ? <Clock size={16} className="text-amber-500 flex-shrink-0" /> :
-                           <AlertTriangle size={16} className="text-rose-500 flex-shrink-0" />}
-                          <div>
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{doc.label} {doc.required && <span className="text-rose-400">*</span>}</p>
-                            <span className={`text-[10px] font-semibold ${isApproved ? 'text-emerald-500' : isReview ? 'text-amber-500' : 'text-rose-500'}`}>{doc.status}</span>
-                          </div>
-                        </div>
-                        {!isApproved && (
-                          <button
-                            onClick={() => simulateDocumentUpload(doc.field)}
-                            disabled={uploading}
-                            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition ${uploading ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
-                          >
-                            <Upload size={12} /> {uploading ? 'Uploading...' : isReview ? 'Re-upload' : 'Upload'}
-                          </button>
-                        )}
-                        {isApproved && (
-                          <span className="text-xs font-bold text-emerald-500 flex items-center gap-1"><CheckCircle2 size={12} /> Verified</span>
-                        )}
-                      </div>
-                    );
-                  })}
+                          const isApproved = doc.status === 'Approved';
+                          const isReview = doc.status === 'Under Review' || doc.status === 'Approved' || doc.status === 'Verified';
+                          const uploading = uploadProgress[doc.field] === 'Uploading';
+                          return (
+                            <div key={doc.field} className="flex items-center justify-between p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-slate-100/30 dark:bg-slate-900/30">
+                              <div className="flex items-center gap-3">
+                                {isApproved ? <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" /> :
+                                 isReview ? <Clock size={16} className="text-amber-500 flex-shrink-0" /> :
+                                 <AlertTriangle size={16} className="text-rose-500 flex-shrink-0" />}
+                                <div>
+                                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{doc.label} {doc.required && <span className="text-rose-400">*</span>}</p>
+                                  <span className={`text-[10px] font-semibold ${isApproved ? 'text-emerald-500' : isReview ? 'text-amber-500' : 'text-rose-500'}`}>{doc.status}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {doc.url && (
+                                  <a
+                                    href={`${API_URL}${doc.url}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="px-2.5 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-bold rounded text-[10px] transition"
+                                  >
+                                    View Doc
+                                  </a>
+                                )}
+                                {!isApproved && (
+                                  <button
+                                    onClick={() => handleRealDocumentUpload(doc.field)}
+                                    disabled={uploading}
+                                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition ${uploading ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+                                  >
+                                    <Upload size={12} /> {uploading ? 'Uploading...' : isReview ? 'Re-upload' : 'Upload'}
+                                  </button>
+                                )}
+                                {isApproved && (
+                                  <span className="text-xs font-bold text-emerald-500 flex items-center gap-1"><CheckCircle2 size={12} /> Verified</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </>
                   );
@@ -3219,11 +3261,11 @@ export default function App() {
                           <span className="text-[9px] text-slate-400 mt-1 block">Supported Formats: PDF, JPG (Max 2MB)</span>
                         </div>
                         <button 
-                          onClick={() => simulateDocumentUpload('caste')}
+                          onClick={() => handleRealDocumentUpload('casteCert')}
                           className="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center space-x-1"
                         >
                           <Upload size={12} />
-                          <span>{uploadProgress['caste'] === 'Uploading' ? 'Uploading...' : uploadProgress['caste'] === 'Completed' ? 'Done' : 'Upload'}</span>
+                          <span>{uploadProgress['casteCert'] === 'Uploading' ? 'Uploading...' : uploadProgress['casteCert'] === 'Completed' ? 'Done' : 'Upload'}</span>
                         </button>
                       </div>
                     </div>
@@ -3773,50 +3815,58 @@ export default function App() {
                 </div>
 
                 <div className="space-y-2.5">
-                  {[
-                    { label: '10th Marksheet', field: 'marksheet10', req: true },
-                    { label: '12th Marksheet / Diploma', field: 'marksheet12', req: true },
-                    { label: 'Aadhar Card', field: 'aadhar', req: true },
-                    { label: 'Passport Photo', field: 'passport', req: true },
-                    { label: 'Caste Certificate', field: 'casteCert', req: false },
-                    { label: 'Migration Certificate', field: 'migCert', req: true },
-                  ].map(doc => {
-                    const isUploaded = selectedLead.docStatus === 'Verified' || selectedLead.docStatus === 'Under Review';
-                    return (
-                      <div key={doc.field} className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-slate-100/30 dark:bg-slate-900/30 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${selectedLead.docStatus === 'Verified' ? 'bg-emerald-500' : selectedLead.docStatus === 'Under Review' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
-                          <div>
-                            <span className="font-bold text-slate-800 dark:text-slate-200">{doc.label}</span>
-                            <span className="text-[10px] block text-slate-400">
-                              {selectedLead.docStatus === 'Verified' ? 'Verified ✓' : selectedLead.docStatus === 'Under Review' ? 'Under Review ⏳' : 'Not Uploaded ❌'}
-                            </span>
+                  {(() => {
+                    const profile = selectedLead.studentProfile || {};
+                    const docs = [
+                      { field: 'marksheet10', label: '10th Marksheet', status: profile.doc10thStatus || 'Pending', url: profile.doc10thUrl, required: true },
+                      { field: 'marksheet12', label: '12th Marksheet / Diploma', status: profile.doc12thStatus || 'Pending', url: profile.doc12thUrl, required: true },
+                      { field: 'aadhar', label: 'Aadhar Card', status: profile.docAadharStatus || 'Pending', url: profile.docAadharUrl, required: true },
+                      { field: 'passport', label: 'Passport Photo', status: profile.docPhotoStatus || 'Pending', url: profile.docPhotoUrl, required: true },
+                      { field: 'casteCert', label: 'Caste Certificate', status: profile.docGradStatus || 'Pending', url: profile.docGradUrl, required: false },
+                      { field: 'migCert', label: 'Migration Certificate', status: profile.docSignatureStatus || 'Pending', url: profile.docSignatureUrl, required: true },
+                    ];
+
+                    return docs.map(doc => {
+                      const isApproved = doc.status === 'Approved';
+                      const isReview = doc.status === 'Under Review' || doc.status === 'Approved' || doc.status === 'Verified';
+                      const isUploaded = !!doc.url;
+                      const uploading = uploadProgress[doc.field] === 'Uploading';
+
+                      return (
+                        <div key={doc.field} className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-slate-100/30 dark:bg-slate-900/30 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${isApproved ? 'bg-emerald-500' : isReview ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+                            <div>
+                              <span className="font-bold text-slate-800 dark:text-slate-200">{doc.label} {doc.required && <span className="text-rose-400">*</span>}</span>
+                              <span className="text-[10px] block text-slate-400">
+                                {isApproved ? 'Approved ✓' : isReview ? 'Under Review ⏳' : 'Not Uploaded ❌'}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedLead({ ...selectedLead, docStatus: 'Under Review' });
-                              alert(`${doc.label} simulated upload complete!`);
-                            }}
-                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold rounded text-[10px] transition"
-                          >
-                            Upload File
-                          </button>
-                          {isUploaded && (
+                          <div className="flex gap-2 items-center">
+                            {isUploaded && (
+                              <a
+                                href={`${API_URL}${doc.url}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-bold rounded text-[10px] transition"
+                              >
+                                View Doc
+                              </a>
+                            )}
                             <button
                               type="button"
-                              onClick={() => alert(`Opening simulated viewer for: ${doc.label}`)}
-                              className="px-2 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-bold rounded text-[10px] transition"
+                              disabled={uploading}
+                              onClick={() => handleRealDocumentUpload(doc.field, selectedLead.id)}
+                              className={`px-2 py-1 font-bold rounded text-[10px] transition ${uploading ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'}`}
                             >
-                              View Doc
+                              {uploading ? 'Uploading...' : 'Upload File'}
                             </button>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
 
                 <div className="flex justify-end gap-2 border-t pt-3">

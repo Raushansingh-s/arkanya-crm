@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import * as path from 'path';
 import apiRouter from './routes/api';
 import prisma from './utils/db';
 
@@ -10,14 +11,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Enable security headers and CORS
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false // Allow loading uploaded images/files in iframe/img tags
+}));
 app.use(cors({
   origin: '*', // Allow all origins for local development/testing
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Request logger middleware
 app.use((req, res, next) => {
