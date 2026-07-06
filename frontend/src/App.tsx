@@ -539,7 +539,11 @@ export default function App() {
       });
 
       const data = await res.json();
-      alert(data.message);
+      if (res.ok) {
+        alert(data.message);
+      } else {
+        alert(`Error booking seat: ${data.error || 'Unknown error'}`);
+      }
       fetchMasterData();
     } catch (e) {
       console.error(e);
@@ -2665,8 +2669,11 @@ export default function App() {
                             setIsSavingCollege(true);
                             setCollegeSaveMsg('');
                             try {
-                              const res = await fetch(`${API_URL}/api/erp/colleges/create`, {
-                                method: 'POST',
+                              const isEdit = collegeView === 'edit';
+                              const url = isEdit ? `${API_URL}/api/erp/colleges/${selectedCollege?.id}` : `${API_URL}/api/erp/colleges/create`;
+                              const method = isEdit ? 'PATCH' : 'POST';
+                              const res = await fetch(url, {
+                                method,
                                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
                                 body: JSON.stringify({
                                   ...collegeForm,
@@ -2914,9 +2921,9 @@ export default function App() {
                         <td className="py-3 px-4 font-bold text-slate-950 dark:text-slate-100">{tx.invoiceNumber || 'N/A'}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded text-[10px] ${
-                            tx.type === 'Income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+                            tx.type === 'INCOME' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
                           }`}>
-                            {tx.type}
+                            {tx.type === 'INCOME' ? 'Income' : 'Expense'}
                           </span>
                         </td>
                         <td className="py-3 px-4">{tx.category}</td>

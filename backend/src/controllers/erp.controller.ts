@@ -236,3 +236,66 @@ export async function bookSeat(req: AuthenticatedRequest, res: Response) {
     return res.status(500).json({ error: error.message });
   }
 }
+
+
+export async function updateCollege(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const { universityId, name, state, district, address, contactPerson, phone, email, website, naacGrade, aicteApproved, ugcApproved, ranking, hostelDetails, placementStats, highestPackage, averagePackage, infrastructureNotes } = req.body;
+
+    const college = await prisma.college.update({
+      where: { id },
+      data: {
+        universityId,
+        name,
+        state,
+        district,
+        address,
+        contactPerson,
+        phone,
+        email,
+        website,
+        naacGrade,
+        aicteApproved: aicteApproved !== undefined ? !!aicteApproved : undefined,
+        ugcApproved: ugcApproved !== undefined ? !!ugcApproved : undefined,
+        ranking: ranking ? parseInt(ranking) : null,
+        hostelDetails,
+        placementStats,
+        highestPackage: highestPackage ? parseFloat(highestPackage) : null,
+        averagePackage: averagePackage ? parseFloat(averagePackage) : null,
+        infrastructureNotes
+      }
+    });
+
+    return res.status(200).json(college);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function updateCourse(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const { degree, branch, eligibility, durationYears, totalFees, semesterFees, registrationFees, examFees, hostelFees, seatsTotal } = req.body;
+
+    const course = await prisma.course.update({
+      where: { id },
+      data: {
+        degree,
+        branch,
+        eligibility,
+        durationYears: durationYears ? parseInt(durationYears) : undefined,
+        totalFees: totalFees ? parseFloat(totalFees) : undefined,
+        semesterFees: semesterFees ? parseFloat(semesterFees) : undefined,
+        registrationFees: registrationFees ? parseFloat(registrationFees) : undefined,
+        examFees: examFees ? parseFloat(examFees) : undefined,
+        hostelFees: hostelFees ? parseFloat(hostelFees) : undefined,
+        seatsTotal: seatsTotal ? parseInt(seatsTotal) : undefined,
+      }
+    });
+
+    return res.status(200).json(course);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
