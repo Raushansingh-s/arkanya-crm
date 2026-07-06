@@ -892,9 +892,6 @@ export default function App() {
             </button>
           </form>
 
-          <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/10 rounded-lg text-[10.5px] text-slate-400 leading-relaxed">
-            🎓 <strong>Student?</strong> Log in with your registered email and the password shared by your counsellor. Contact your institution if you forgot your credentials.
-          </div>
         </div>
       </div>
     );
