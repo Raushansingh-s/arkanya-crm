@@ -1509,104 +1509,110 @@ export default function App() {
               </div>
 
               {/* Summary Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { label: 'Total Students', value: leads.filter(l => l.pipelineStage === 'Confirmed').length + 12, color: 'text-blue-500' },
-                  { label: 'Docs Verified', value: leads.filter(l => l.pipelineStage === 'Confirmed').length + 7, color: 'text-emerald-500' },
-                  { label: 'Fee Pending', value: 4, color: 'text-amber-500' },
-                  { label: 'Offer Letters Sent', value: leads.filter(l => l.pipelineStage === 'Confirmed').length + 10, color: 'text-indigo-500' },
-                ].map(s => (
-                  <div key={s.label} className="glass-card p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/30">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">{s.label}</span>
-                    <span className={`text-2xl font-extrabold mt-1 ${s.color}`}>{s.value}</span>
-                  </div>
-                ))}
-              </div>
+              {(() => {
+                const enrolledStudents = leads.filter(l => l.pipelineStage === 'Confirmed').map((l, i) => ({
+                  id: l.id, name: l.name, email: l.email, phone: l.phone,
+                  course: l.preferredCourse || 'N/A', college: l.preferredCollege || 'N/A',
+                  counsellor: l.counsellor?.username || 'Aditi Sharma',
+                  docStatus: i % 3 === 0 ? 'Pending' : i % 3 === 1 ? 'Under Review' : 'Verified',
+                  feeStatus: i % 2 === 0 ? 'Paid' : 'Pending',
+                  stage: 'Enrolled',
+                }));
 
-              {/* Students Table */}
-              <div className="glass-card rounded-2xl border border-slate-200/40 dark:border-slate-800/30 overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-extrabold tracking-wider text-[10px]">
-                      <th className="py-3 px-4">Student</th>
-                      <th className="py-3 px-4">Course Applied</th>
-                      <th className="py-3 px-4">College</th>
-                      <th className="py-3 px-4">Assigned Counsellor</th>
-                      <th className="py-3 px-4">Doc Status</th>
-                      <th className="py-3 px-4">Fee Status</th>
-                      <th className="py-3 px-4">Admission Stage</th>
-                      <th className="py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="font-semibold text-slate-700 dark:text-slate-300">
-                    {/* Derive students from confirmed leads + mock enrolled students */}
-                    {[
-                      ...leads.filter(l => l.pipelineStage === 'Confirmed').map((l, i) => ({
-                        id: l.id, name: l.name, email: l.email, phone: l.phone,
-                        course: l.preferredCourse || 'N/A', college: l.preferredCollege || 'N/A',
-                        counsellor: l.counsellor?.username || 'Aditi Sharma',
-                        docStatus: i % 3 === 0 ? 'Pending' : i % 3 === 1 ? 'Under Review' : 'Verified',
-                        feeStatus: i % 2 === 0 ? 'Paid' : 'Pending',
-                        stage: 'Enrolled',
-                      })),
-                      { id: 'mock1', name: 'Riya Mehta', email: 'riya@example.com', phone: '9876543210', course: 'B.Tech CSE', college: 'Amity University', counsellor: 'Vikram Nair', docStatus: 'Verified', feeStatus: 'Paid', stage: 'Enrolled' },
-                      { id: 'mock2', name: 'Aman Srivastava', email: 'aman@example.com', phone: '9811223344', course: 'MBA Finance', college: 'KIIT University', counsellor: 'Aditi Sharma', docStatus: 'Pending', feeStatus: 'Pending', stage: 'Offer Issued' },
-                      { id: 'mock3', name: 'Preeti Jain', email: 'preeti@example.com', phone: '9988776655', course: 'B.Sc Biotech', college: 'Manipal University', counsellor: 'Rahul Das', docStatus: 'Verified', feeStatus: 'Paid', stage: 'Enrolled' },
-                    ].map((student) => {
-                      const docColor = student.docStatus === 'Verified' ? 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' : student.docStatus === 'Under Review' ? 'text-amber-600 bg-amber-500/10 border-amber-500/30' : 'text-rose-600 bg-rose-500/10 border-rose-500/30';
-                      const feeColor = student.feeStatus === 'Paid' ? 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' : 'text-amber-600 bg-amber-500/10 border-amber-500/30';
-                      return (
-                        <tr key={student.id} className="border-b border-slate-200/40 dark:border-slate-800/40 hover:bg-slate-100/30 dark:hover:bg-slate-900/30 transition">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                                {student.name.charAt(0)}
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-800 dark:text-slate-200">{student.name}</p>
-                                <p className="text-[10px] text-slate-400">{student.email}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{student.course}</td>
-                          <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{student.college}</td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                              <span className="text-slate-600 dark:text-slate-400">{student.counsellor}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${docColor}`}>{student.docStatus}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${feeColor}`}>{student.feeStatus}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/30">{student.stage}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <button className="text-[10px] font-bold px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1">
-                                <Eye size={11} /> View
-                              </button>
-                              <button className="text-[10px] font-bold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg flex items-center gap-1">
-                                <Edit3 size={11} /> Edit
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                {leads.filter(l => l.pipelineStage === 'Confirmed').length === 0 && (
-                  <div className="text-center py-12 text-slate-400 text-xs">
-                    <Users size={32} className="mx-auto mb-3 opacity-30" />
-                    No enrolled students yet. Confirmed leads automatically appear here.
-                  </div>
-                )}
-              </div>
+                const total = enrolledStudents.length;
+                const verified = enrolledStudents.filter(s => s.docStatus === 'Verified').length;
+                const feePending = enrolledStudents.filter(s => s.feeStatus === 'Pending').length;
+
+                return (
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {[
+                        { label: 'Total Students', value: total, color: 'text-blue-500' },
+                        { label: 'Docs Verified', value: verified, color: 'text-emerald-500' },
+                        { label: 'Fee Pending', value: feePending, color: 'text-amber-500' },
+                        { label: 'Offer Letters Sent', value: total, color: 'text-indigo-500' },
+                      ].map(s => (
+                        <div key={s.label} className="glass-card p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/30">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block">{s.label}</span>
+                          <span className={`text-2xl font-extrabold mt-1 ${s.color}`}>{s.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Students Table */}
+                    <div className="glass-card rounded-2xl border border-slate-200/40 dark:border-slate-800/30 overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-extrabold tracking-wider text-[10px]">
+                            <th className="py-3 px-4">Student</th>
+                            <th className="py-3 px-4">Course Applied</th>
+                            <th className="py-3 px-4">College</th>
+                            <th className="py-3 px-4">Assigned Counsellor</th>
+                            <th className="py-3 px-4">Doc Status</th>
+                            <th className="py-3 px-4">Fee Status</th>
+                            <th className="py-3 px-4">Admission Stage</th>
+                            <th className="py-3 px-4">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="font-semibold text-slate-700 dark:text-slate-300">
+                          {enrolledStudents.map((student) => {
+                            const docColor = student.docStatus === 'Verified' ? 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' : student.docStatus === 'Under Review' ? 'text-amber-600 bg-amber-500/10 border-amber-500/30' : 'text-rose-600 bg-rose-500/10 border-rose-500/30';
+                            const feeColor = student.feeStatus === 'Paid' ? 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' : 'text-amber-600 bg-amber-500/10 border-amber-500/30';
+                            return (
+                              <tr key={student.id} className="border-b border-slate-200/40 dark:border-slate-800/40 hover:bg-slate-100/30 dark:hover:bg-slate-900/30 transition">
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                      {student.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                      <p className="font-bold text-slate-800 dark:text-slate-200">{student.name}</p>
+                                      <p className="text-[10px] text-slate-400">{student.email}</p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{student.course}</td>
+                                <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{student.college}</td>
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span className="text-slate-600 dark:text-slate-400">{student.counsellor}</span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${docColor}`}>{student.docStatus}</span>
+                                </td>
+                                <td className="py-3 px-4">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${feeColor}`}>{student.feeStatus}</span>
+                                </td>
+                                <td className="py-3 px-4">
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/30">{student.stage}</span>
+                                </td>
+                                <td className="py-3 px-4">
+                                  <div className="flex items-center gap-2">
+                                    <button className="text-[10px] font-bold px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1">
+                                      <Eye size={11} /> View
+                                    </button>
+                                    <button className="text-[10px] font-bold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg flex items-center gap-1">
+                                      <Edit3 size={11} /> Edit
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                      {total === 0 && (
+                        <div className="text-center py-12 text-slate-400 text-xs">
+                          <Users size={32} className="mx-auto mb-3 opacity-30" />
+                          No enrolled students yet. Confirmed leads automatically appear here.
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 
