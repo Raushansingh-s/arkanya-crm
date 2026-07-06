@@ -923,7 +923,11 @@ export default function App() {
             </button>
           </form>
 
-          <div className="mt-8 border-t border-slate-900 pt-6">
+          <div className="mt-4 p-3 bg-blue-500/5 border border-blue-500/10 rounded-lg text-[10.5px] text-slate-400 leading-relaxed">
+            🎓 <strong>Student Portal Login Info:</strong> If you are an enrolled student, log in with your registered email, workspace <code>arkanya</code>, and the default password <code>password123</code>.
+          </div>
+
+          <div className="mt-6 border-t border-slate-900 pt-6">
             <h3 className="text-xs font-semibold text-slate-400 mb-3 text-center">EXAMINER EVALUATION SHORTCUTS</h3>
             <div className="grid grid-cols-2 gap-2 text-center text-xs font-medium text-slate-200">
               <button onClick={() => quickLoginAs('SUPERADMIN')} className="p-2 rounded bg-slate-900 border border-slate-800 hover:bg-slate-800 transition">
@@ -3799,6 +3803,17 @@ export default function App() {
                         <option value="Paid">Paid / Complete</option>
                       </select>
                     </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs space-y-1.5 mt-3">
+                  <span className="font-extrabold text-blue-500 uppercase block tracking-wider text-[10px]">Student Portal Credentials</span>
+                  <p className="text-slate-600 dark:text-slate-400">The student can log in to the Student Portal using these details:</p>
+                  <div className="space-y-1 font-mono text-[11px] bg-slate-900 text-white p-2.5 rounded-lg">
+                    <div><strong>Portal URL:</strong> http://{window.location.host}</div>
+                    <div><strong>Workspace:</strong> arkanya</div>
+                    <div><strong>Login Email:</strong> {selectedLead.email}</div>
+                    <div><strong>Default Password:</strong> password123</div>
                   </div>
                 </div>
 
