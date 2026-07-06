@@ -228,6 +228,20 @@ export default function App() {
     }
   }, [selectedLead]);
   
+  // Employee Management States
+  const [employeeUsers, setEmployeeUsers] = useState<any[]>([]);
+  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);
+  const [isSavingEmployee, setIsSavingEmployee] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState('');
+  const [employeeForm, setEmployeeForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    role: 'COUNSELLOR',
+    isActive: true
+  });
+
   // Forms & Filter inputs
   const [searchQuery, setSearchQuery] = useState('');
   const [tenantSlugInput, setTenantSlugInput] = useState('arkanya');
@@ -340,6 +354,11 @@ export default function App() {
       if (txRes.ok) setTransactions(await txRes.json());
       if (pnlRes.ok) setAccountingStats(await pnlRes.json());
       if (statsRes.ok) setCounsellorStats(await statsRes.json());
+
+      if (currentUser?.role === 'SUPERADMIN') {
+        const usersRes = await fetch(`${API_URL}/api/users`, { headers });
+        if (usersRes.ok) setEmployeeUsers(await usersRes.json());
+      }
     } catch (e) {
       console.error('Error fetching dashboard resources', e);
     }
@@ -1068,6 +1087,7 @@ export default function App() {
               <NavSection label="Admissions" />
               <NavBtn tab="crm" icon={<Kanban size={18} />} label="Lead CRM Pipeline" />
               <NavBtn tab="students" icon={<Users size={18} />} label="Students Management" />
+              <NavBtn tab="users" icon={<UserCheck size={18} />} label="Employee Management" />
               <NavSection label="Institutions" />
               <NavBtn tab="colleges" icon={<School size={18} />} label="Colleges & Seats" />
               <NavBtn tab="agreements" icon={<FileText size={18} />} label="Legal Agreements" />
@@ -1179,6 +1199,7 @@ export default function App() {
                activeTab === 'dashboard-finance' ? 'Finance & Revenue Dashboard' :
                activeTab === 'crm'               ? (isCounsellor ? 'My Lead Pipeline' : 'Lead CRM Pipeline') :
                activeTab === 'students'          ? (isCounsellor ? 'My Students' : 'Students Management') :
+               activeTab === 'users'             ? 'Employee & Staff Management' :
                activeTab === 'colleges'          ? 'University & College Registry' :
                activeTab === 'colleges-readonly' ? 'Partner Colleges (View Only)' :
                activeTab === 'agreements'        ? (isDirectorFinance ? 'Commission Agreements' : 'Legal Agreements & Contracts') :
@@ -3318,6 +3339,108 @@ export default function App() {
             </div>
           )}
 
+          {/* TAB: EMPLOYEE MANAGEMENT — Superadmin Only */}
+          {activeTab === 'users' && isSuperAdmin && (
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
+                  <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+                    {employeeUsers.length} Employees Registered
+                  </span>
+                </div>
+                <button 
+                  onClick={() => {
+                    setSelectedEmployee(null);
+                    setEmployeeForm({ username: '', email: '', password: '', role: 'COUNSELLOR', isActive: true });
+                    setEmployeeModalOpen(true);
+                    setGeneratedPassword('');
+                  }}
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center space-x-2"
+                >
+                  <UserPlus size={15} />
+                  <span>Add New Employee</span>
+                </button>
+              </div>
+
+              {/* Employees Table */}
+              <div className="glass-card p-6 rounded-2xl border border-slate-200/40 dark:border-slate-800/30 overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs font-semibold">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase tracking-wider font-bold">
+                      <th className="py-3 px-4">Name</th>
+                      <th className="py-3 px-4">Email</th>
+                      <th className="py-3 px-4">Role</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Created Date</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-700 dark:text-slate-300">
+                    {employeeUsers.map(emp => (
+                      <tr key={emp.id} className="border-b border-slate-200/40 dark:border-slate-800/40 hover:bg-slate-100/30 dark:hover:bg-slate-900/30 text-xs">
+                        <td className="py-3 px-4 font-bold text-slate-950 dark:text-slate-100">{emp.username}</td>
+                        <td className="py-3 px-4">{emp.email}</td>
+                        <td className="py-3 px-4">
+                          <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[10px] uppercase font-bold text-slate-400">
+                            {emp.role.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            emp.isActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+                          }`}>
+                            {emp.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-slate-400">{new Date(emp.createdAt).toLocaleDateString()}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setSelectedEmployee(emp);
+                                setEmployeeForm({ username: emp.username, email: emp.email, password: '', role: emp.role, isActive: emp.isActive });
+                                setEmployeeModalOpen(true);
+                                setGeneratedPassword('');
+                              }}
+                              className="text-[10px] font-bold px-2 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded"
+                            >
+                              Edit / Reset
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (confirm(`Are you sure you want to delete ${emp.username}'s account?`)) {
+                                  try {
+                                    const res = await fetch(`${API_URL}/api/users/${emp.id}`, {
+                                      method: 'DELETE',
+                                      headers: { Authorization: `Bearer ${authToken}` }
+                                    });
+                                    if (res.ok) {
+                                      alert('Employee deleted successfully.');
+                                      fetchMasterData();
+                                    } else {
+                                      const err = await res.json();
+                                      alert(`Error: ${err.error}`);
+                                    }
+                                  } catch (err: any) {
+                                    alert(`Network error: ${err.message}`);
+                                  }
+                                }
+                              }}
+                              className="text-[10px] font-bold px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* TAB 8: SYSTEM CONFIGURATION */}
           {activeTab === 'system-config' && (
             <div className="space-y-6">
@@ -3886,6 +4009,205 @@ export default function App() {
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* ADD / EDIT EMPLOYEE MODAL */}
+      {employeeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div className="flex justify-between items-start border-b pb-3">
+              <h3 className="text-sm font-extrabold uppercase">
+                {selectedEmployee ? `Edit Employee: ${selectedEmployee.username}` : 'Add New Employee'}
+              </h3>
+              <button 
+                onClick={() => setEmployeeModalOpen(false)} 
+                className="text-slate-400 hover:text-white"
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs font-semibold">
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
+                <input 
+                  type="text" 
+                  value={employeeForm.username} 
+                  onChange={e => setEmployeeForm({ ...employeeForm, username: e.target.value })}
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal" 
+                  placeholder="e.g. Aditi Sharma"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  value={employeeForm.email} 
+                  onChange={e => setEmployeeForm({ ...employeeForm, email: e.target.value })}
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal" 
+                  placeholder="name@arkanya.in"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Employee Role</label>
+                  <select
+                    value={employeeForm.role}
+                    onChange={e => setEmployeeForm({ ...employeeForm, role: e.target.value })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-500"
+                  >
+                    <option value="SUPERADMIN">Super Admin</option>
+                    <option value="DIRECTOR_ACADEMICS">Director Academics</option>
+                    <option value="DIRECTOR_FINANCE">Director Finance</option>
+                    <option value="DIRECTOR_LEGAL">Director Legal</option>
+                    <option value="COUNSELLOR">Counsellor</option>
+                    <option value="TELECALLER">Telecaller</option>
+                    <option value="ACCOUNTANT">Accountant</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Account Status</label>
+                  <select
+                    value={employeeForm.isActive ? 'true' : 'false'}
+                    onChange={e => setEmployeeForm({ ...employeeForm, isActive: e.target.value === 'true' })}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-500"
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Password Management */}
+              <div className="border-t pt-3 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-extrabold text-blue-500 uppercase tracking-wider text-[10px]">
+                    Password Management
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const generated = Math.random().toString(36).slice(-8) + 'A1!';
+                      setEmployeeForm({ ...employeeForm, password: generated });
+                      setGeneratedPassword(generated);
+                    }}
+                    className="text-[10px] text-blue-500 hover:underline font-bold"
+                  >
+                    Auto-Generate Password
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">
+                    {selectedEmployee ? 'New Password (Leave blank to keep current)' : 'Password'}
+                  </label>
+                  <input 
+                    type="text" 
+                    value={employeeForm.password} 
+                    onChange={e => {
+                      setEmployeeForm({ ...employeeForm, password: e.target.value });
+                      setGeneratedPassword(e.target.value);
+                    }}
+                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-mono" 
+                    placeholder={selectedEmployee ? 'Type or generate to reset' : 'password123'}
+                  />
+                </div>
+
+                {generatedPassword && (
+                  <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded text-[11px] font-mono select-all">
+                    🔑 <strong>Plain Password:</strong> {generatedPassword} <br/>
+                    <span className="text-[9px] text-slate-400 block mt-1 font-sans">
+                      (Copy and share this password with the employee immediately. It is shown only once!)
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 border-t pt-3">
+              <button 
+                onClick={() => setEmployeeModalOpen(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-xl transition"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!employeeForm.username || !employeeForm.email) {
+                    alert('Username and email are required.');
+                    return;
+                  }
+                  setIsSavingEmployee(true);
+                  try {
+                    if (selectedEmployee) {
+                      // 1. Update Profile Details
+                      const res = await fetch(`${API_URL}/api/users/${selectedEmployee.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                        body: JSON.stringify({
+                          username: employeeForm.username,
+                          email: employeeForm.email,
+                          role: employeeForm.role,
+                          isActive: employeeForm.isActive
+                        })
+                      });
+
+                      // 2. If password specified, reset password too
+                      if (employeeForm.password) {
+                        await fetch(`${API_URL}/api/users/${selectedEmployee.id}/reset-password`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                          body: JSON.stringify({ password: employeeForm.password })
+                        });
+                      }
+
+                      if (res.ok) {
+                        alert('Employee account updated successfully.');
+                        setEmployeeModalOpen(false);
+                        fetchMasterData();
+                      } else {
+                        const err = await res.json();
+                        alert(`Error: ${err.error}`);
+                      }
+                    } else {
+                      // Add new employee
+                      if (!employeeForm.password) {
+                        alert('Password is required for new employee.');
+                        setIsSavingEmployee(false);
+                        return;
+                      }
+                      const res = await fetch(`${API_URL}/api/users/create`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                        body: JSON.stringify(employeeForm)
+                      });
+                      if (res.ok) {
+                        alert(`Employee created successfully! Share password: ${employeeForm.password}`);
+                        setEmployeeModalOpen(false);
+                        fetchMasterData();
+                      } else {
+                        const err = await res.json();
+                        alert(`Error: ${err.error}`);
+                      }
+                    }
+                  } catch (err: any) {
+                    alert(`Network error: ${err.message}`);
+                  } finally {
+                    setIsSavingEmployee(false);
+                  }
+                }}
+                disabled={isSavingEmployee}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition disabled:opacity-60"
+              >
+                {isSavingEmployee ? 'Saving...' : selectedEmployee ? 'Save Changes' : 'Create Account'}
+              </button>
+            </div>
           </div>
         </div>
       )}

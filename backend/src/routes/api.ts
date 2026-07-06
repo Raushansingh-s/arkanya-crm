@@ -17,6 +17,13 @@ router.get('/auth/profile', authenticateJWT, authController.getProfile);
 router.post('/auth/otp/send', authController.sendOTP);
 router.post('/auth/otp/verify', authController.verifyOTP);
 
+// EMPLOYEE / USER MANAGEMENT ROUTES
+router.get('/users', authenticateJWT, requireRoles(['SUPERADMIN']), authController.getUsers);
+router.post('/users/create', authenticateJWT, requireRoles(['SUPERADMIN']), authController.createUser);
+router.patch('/users/:id', authenticateJWT, requireRoles(['SUPERADMIN']), authController.updateUser);
+router.delete('/users/:id', authenticateJWT, requireRoles(['SUPERADMIN']), authController.deleteUser);
+router.post('/users/:id/reset-password', authenticateJWT, requireRoles(['SUPERADMIN']), authController.resetUserPassword);
+
 // ==========================================
 // STUDENT CRM ROUTES
 // ==========================================

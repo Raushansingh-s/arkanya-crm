@@ -245,3 +245,142 @@ export async function verifyOTP(req: AuthenticatedRequest, res: Response) {
   }
   return res.status(400).json({ error: 'Invalid verification code' });
 }
+
+
+export async function getUsers(req: AuthenticatedRequest, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) return res.status(400).json({ error: 'Tenant ID required' });
+
+    const users = await prisma.user.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+
+    return res.status(200).json(users);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function createUser(req: AuthenticatedRequest, res: Response) {
+  try {
+    const tenantId = req.user?.tenantId;
+    if (!tenantId) return res.status(400).json({ error: 'Tenant ID required' });
+
+    const { email, username, password, role } = req.body;
+    if (!email || !username || !password || !role) {
+      return res.status(400).json({ error: 'All fields (email, username, password, role) are required' });
+    }
+
+    // Check if email already exists
+    const existingUser = await prisma.user.findFirst({
+      where: { email, tenantId }
+    });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User with this email already exists under this tenant' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await prisma.user.create({
+      data: {
+        tenantId,
+        email,
+        username,
+        passwordHash: hashedPassword,
+        role,
+      }
+    });
+
+    return res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        role: newUser.role,
+        isActive: newUser.isActive,
+      }
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function updateUser(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const { username, email, role, isActive } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        username,
+        email,
+        role,
+        isActive: isActive !== undefined ? !!isActive : undefined
+      }
+    });
+
+    return res.status(200).json({
+      message: 'User updated successfully',
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        isActive: updatedUser.isActive,
+      }
+    });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function deleteUser(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    // Prevent deleting yourself
+    if (id === req.user?.id) {
+      return res.status(400).json({ error: 'You cannot delete your own account' });
+    }
+
+    await prisma.user.delete({
+      where: { id }
+    });
+
+    return res.status(200).json({ message: 'User account deleted successfully' });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function resetUserPassword(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ error: 'New password is required' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id },
+      data: { passwordHash: hashedPassword }
+    });
+
+    return res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
