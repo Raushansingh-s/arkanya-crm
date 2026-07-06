@@ -1637,227 +1637,430 @@ export default function App() {
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-[100px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
 
-        <header className="glass-panel sticky top-0 px-6 py-4 flex justify-between items-center z-10 border-b">
-          <div>
-            <h1 className="text-xl font-bold font-sans tracking-tight">
-              {activeTab === 'dashboard'         ? (isSuperAdmin ? 'Master Dashboard' : 'Admissions Dashboard') :
-               activeTab === 'dashboard-finance' ? 'Finance & Revenue Dashboard' :
-               activeTab === 'crm'               ? (isCounsellor ? 'My Lead Pipeline' : 'Lead CRM Pipeline') :
-               activeTab === 'students'          ? (isCounsellor ? 'My Students' : 'Students Management') :
-               activeTab === 'users'             ? 'Employee & Staff Management' :
-               activeTab === 'colleges'          ? 'University & College Registry' :
-               activeTab === 'colleges-readonly' ? 'Partner Colleges (View Only)' :
-               activeTab === 'agreements'        ? (isDirectorFinance ? 'Commission Agreements' : 'Legal Agreements & Contracts') :
-               activeTab === 'accounting'        ? 'Accounting Ledger & Reports' :
-               activeTab === 'ai'                ? (isStudent ? 'AI College Finder' : isCounsellor ? 'AI Recommendations' : 'Arkanya AI Smart Hub') :
-               activeTab === 'student-portal'    ? 'My Admission Status' :
-               activeTab === 'student-documents' ? 'My Documents & Verification' :
-               activeTab === 'student-fees'      ? 'Fee & Payment Tracker' :
-               'ERP System Configuration'}
-            </h1>
-            <p className="text-xs mt-0.5">
-              <span className={`font-bold ${rm.color}`}>{rm.label}</span>
-              <span className="text-slate-500"> • Arkanya Edutech Pvt. Ltd.</span>
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <span className="text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full">
-              {currentUser.username} • Secured Session
-            </span>
-          </div>
+        <header className="glass-panel sticky top-0 px-6 py-3 flex justify-between items-center z-10 border-b">
+          {activeTab === 'dashboard' ? (
+            <>
+              <div>
+                <h1 className="text-lg font-extrabold tracking-tight">
+                  Good Morning, {currentUser.username}! 👋
+                </h1>
+                <p className="text-xs text-slate-500 mt-0.5">Welcome back to Arkanya Edutech ERP Dashboard</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-500">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <button className="flex items-center gap-1.5 bg-[#1a6b2a] hover:bg-[#155522] text-white text-xs font-bold px-4 py-1.5 rounded-lg transition">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Quick Action
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <h1 className="text-xl font-bold font-sans tracking-tight">
+                  {activeTab === 'dashboard-finance' ? 'Finance & Revenue Dashboard' :
+                   activeTab === 'crm'               ? (isCounsellor ? 'My Lead Pipeline' : 'Lead CRM Pipeline') :
+                   activeTab === 'students'          ? (isCounsellor ? 'My Students' : 'Students Management') :
+                   activeTab === 'users'             ? 'Employee & Staff Management' :
+                   activeTab === 'colleges'          ? 'University & College Registry' :
+                   activeTab === 'colleges-readonly' ? 'Partner Colleges (View Only)' :
+                   activeTab === 'agreements'        ? (isDirectorFinance ? 'Commission Agreements' : 'Legal Agreements & Contracts') :
+                   activeTab === 'accounting'        ? 'Accounting Ledger & Reports' :
+                   activeTab === 'ai'                ? (isStudent ? 'AI College Finder' : isCounsellor ? 'AI Recommendations' : 'Arkanya AI Smart Hub') :
+                   activeTab === 'student-portal'    ? 'My Admission Status' :
+                   activeTab === 'student-documents' ? 'My Documents & Verification' :
+                   activeTab === 'student-fees'      ? 'Fee & Payment Tracker' :
+                   'ERP System Configuration'}
+                </h1>
+                <p className="text-xs mt-0.5">
+                  <span className={`font-bold ${rm.color}`}>{rm.label}</span>
+                  <span className="text-slate-500"> • Arkanya Edutech Pvt. Ltd.</span>
+                </p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <span className="text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full">
+                  {currentUser.username} • Secured Session
+                </span>
+              </div>
+            </>
+          )}
         </header>
 
         <div className="flex-1 p-6 relative z-10">
           
           {/* DASHBOARD — SuperAdmin & Director Academics */}
           {activeTab === 'dashboard' && (isSuperAdmin || isDirectorAcademics) && (
-            <div className="space-y-6">
-              {/* Metrics Widgets Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="glass-card p-6 rounded-2xl shadow-sm border border-slate-200/40 dark:border-slate-800/30 flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Leads Managed</span>
-                    <Users className="text-blue-500" size={20} />
-                  </div>
-                  <div className="mt-4">
-                    <span className="text-3xl font-extrabold tracking-tight">{leads.length}</span>
-                    <p className="text-[10px] text-emerald-500 font-semibold mt-1">▲ +12% increase this week</p>
-                  </div>
-                </div>
+            <div className="space-y-4">
 
-                <div className="glass-card p-6 rounded-2xl shadow-sm border border-slate-200/40 dark:border-slate-800/30 flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Confirmed Enrolments</span>
-                    <UserCheck className="text-emerald-500" size={20} />
+              {/* ── ROW 1: KPI STAT CARDS ── */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                {[
+                  { label: 'Total Leads', value: leads.length.toLocaleString(), icon: '👥', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30', trend: '+15.6% this week', up: true },
+                  { label: 'Active Leads', value: leads.filter(l => l.pipelineStage !== 'Lost' && l.pipelineStage !== 'Confirmed').length.toString(), icon: '📋', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30', trend: '+11.3% this week', up: true },
+                  { label: 'Total Admissions', value: leads.filter(l => l.pipelineStage === 'Confirmed').length.toString(), icon: '🎓', color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950/30', trend: '+18.7% this month', up: true },
+                  { label: 'Total Revenue', value: `₹ ${((accountingStats?.summary?.totalIncome || 2458600)).toLocaleString('en-IN')}`, icon: '₹', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', trend: '+22.4% this month', up: true },
+                  { label: 'Pending Payments', value: `₹ ${((accountingStats?.summary?.pendingPayments || 345200)).toLocaleString('en-IN')}`, icon: '⏳', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-950/30', trend: '-8.4% this month', up: false },
+                  { label: 'Partner Colleges', value: colleges.length.toString(), icon: '🏫', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/30', trend: '+9.2% this month', up: true },
+                  { label: 'Counsellors', value: (employeeUsers?.filter((u:any) => u.role === 'COUNSELLOR').length || 38).toString(), icon: '🧑‍💼', color: 'text-teal-600', bg: 'bg-teal-50 dark:bg-teal-950/30', trend: '+5.1% this month', up: true },
+                  { label: 'Pending Follow Ups', value: leads.reduce((a,l) => a + (l.followups?.filter(f => !f.isCompleted).length || 0), 0).toString(), icon: '📞', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/30', trend: '-12.6% today', up: false },
+                ].map((card, i) => (
+                  <div key={i} className={`${card.bg} rounded-xl p-3 border border-slate-100 dark:border-slate-800/50 flex flex-col gap-1.5 hover:shadow-md transition-all`}>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 leading-tight">{card.label}</span>
+                      <span className="text-base">{card.icon}</span>
+                    </div>
+                    <span className={`text-lg font-extrabold ${card.color} leading-tight`}>{card.value}</span>
+                    <div className={`flex items-center gap-0.5 text-[9px] font-bold ${card.up ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      <span>{card.up ? '▲' : '▼'}</span>
+                      <span>{card.trend}</span>
+                    </div>
+                    {/* Mini sparkline */}
+                    <svg height="20" viewBox="0 0 60 20" className="w-full opacity-50">
+                      <polyline
+                        points={card.up
+                          ? `0,18 10,14 20,16 30,10 40,8 50,5 60,3`
+                          : `0,5 10,8 20,6 30,10 40,14 50,16 60,18`}
+                        fill="none"
+                        stroke={card.up ? '#10b981' : '#ef4444'}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </div>
-                  <div className="mt-4">
-                    <span className="text-3xl font-extrabold tracking-tight">
-                      {leads.filter(l => l.pipelineStage === 'Confirmed').length}
-                    </span>
-                    <p className="text-[10px] text-emerald-500 font-semibold mt-1">▲ 85.5% conversion success score</p>
-                  </div>
-                </div>
-
-                <div className="glass-card p-6 rounded-2xl shadow-sm border border-slate-200/40 dark:border-slate-800/30 flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Partner Colleges</span>
-                    <School className="text-indigo-500" size={20} />
-                  </div>
-                  <div className="mt-4">
-                    <span className="text-3xl font-extrabold tracking-tight">{colleges.length}</span>
-                    <p className="text-[10px] text-slate-400 mt-1">From {universities.length} Universities across 2 states</p>
-                  </div>
-                </div>
-
-                <div className="glass-card p-6 rounded-2xl shadow-sm border border-slate-200/40 dark:border-slate-800/30 flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gross Commission Revenue</span>
-                    <DollarSign className="text-amber-500" size={20} />
-                  </div>
-                  <div className="mt-4">
-                    <span className="text-3xl font-extrabold tracking-tight">
-                      ₹{(accountingStats?.summary?.totalIncome || 205000).toLocaleString('en-IN')}
-                    </span>
-                    <p className="text-[10px] text-emerald-500 font-semibold mt-1">▲ +8% monthly growth rate</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              {/* Analytical Charts Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Graph 1: Conversions / Pipeline breakdown */}
-                <div className="glass-card p-6 rounded-2xl border border-slate-200/40 dark:border-slate-800/30 lg:col-span-2">
-                  <h3 className="font-bold text-sm text-slate-500 uppercase mb-4">Daily Inflow & Admissions (Recharts)</h3>
-                  <div className="h-64">
+              {/* ── ROW 2: CHARTS ── */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                {/* Lead Trend Overview */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-5">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Lead Trend Overview</h3>
+                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Week</option><option>This Month</option></select>
+                  </div>
+                  <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={[
-                        { date: 'Mon', Leads: 4, Confirmed: 1 },
-                        { date: 'Tue', Leads: 9, Confirmed: 2 },
-                        { date: 'Wed', Leads: 6, Confirmed: 1 },
-                        { date: 'Thu', Leads: 12, Confirmed: 4 },
-                        { date: 'Fri', Leads: 15, Confirmed: 5 },
-                        { date: 'Sat', Leads: 8, Confirmed: 3 },
-                        { date: 'Sun', Leads: 5, Confirmed: 1 },
-                      ]}>
+                        { date: 'Mon', Leads: 400, Converted: 240 },
+                        { date: 'Tue', Leads: 700, Converted: 350 },
+                        { date: 'Wed', Leads: 500, Converted: 280 },
+                        { date: 'Thu', Leads: 900, Converted: 430 },
+                        { date: 'Fri', Leads: 1000, Converted: 510 },
+                        { date: 'Sat', Leads: 750, Converted: 380 },
+                        { date: 'Sun', Leads: 600, Converted: 300 },
+                      ]} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                         <defs>
-                          <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          <linearGradient id="lgLeads" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#1a8a2a" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#1a8a2a" stopOpacity={0}/>
                           </linearGradient>
-                          <linearGradient id="colorAdmissions" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          <linearGradient id="lgConv" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#86efac" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#86efac" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} />
-                        <YAxis stroke="#94a3b8" fontSize={11} />
-                        <Tooltip />
-                        <Area type="monotone" dataKey="Leads" stroke="#3b82f6" fillOpacity={1} fill="url(#colorLeads)" strokeWidth={2} />
-                        <Area type="monotone" dataKey="Confirmed" stroke="#10b981" fillOpacity={1} fill="url(#colorAdmissions)" strokeWidth={2} />
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.08}/>
+                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false}/>
+                        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false}/>
+                        <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }}/>
+                        <Legend wrapperStyle={{ fontSize: 10 }}/>
+                        <Area type="monotone" dataKey="Leads" stroke="#1a6b2a" fill="url(#lgLeads)" strokeWidth={2}/>
+                        <Area type="monotone" dataKey="Converted" stroke="#86efac" fill="url(#lgConv)" strokeWidth={2}/>
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                {/* Graph 2: Lead Sources Pie chart */}
-                <div className="glass-card p-6 rounded-2xl border border-slate-200/40 dark:border-slate-800/30">
-                  <h3 className="font-bold text-sm text-slate-500 uppercase mb-4">Lead Source Inflow</h3>
-                  <div className="h-64 flex justify-center items-center">
+                {/* Lead Funnel */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
+                  <h3 className="font-bold text-sm mb-3">Lead Funnel</h3>
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Total Leads', value: leads.length || 2458, pct: 100, color: '#1a4a2a' },
+                      { label: 'Contacted', value: Math.round((leads.length || 2458) * 0.58), pct: 58, color: '#2a6a3a' },
+                      { label: 'Interested', value: Math.round((leads.length || 2458) * 0.34), pct: 34, color: '#3a8a4a' },
+                      { label: 'Counselling', value: leads.filter(l=>l.pipelineStage==='Counselling').length || 520, pct: 21, color: '#4aaa5a' },
+                      { label: 'Admissions', value: leads.filter(l=>l.pipelineStage==='Confirmed').length || 320, pct: 13, color: '#5aca6a' },
+                      { label: 'Paid / Enrolled', value: Math.round((leads.filter(l=>l.pipelineStage==='Confirmed').length || 320) * 0.53), pct: 7, color: '#86efac' },
+                    ].map((row, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        <div className="w-full relative">
+                          <div className="h-6 rounded flex items-center px-2 text-white text-[10px] font-bold" style={{ background: row.color, width: `${Math.max(row.pct, 12)}%`, minWidth: 60 }}>
+                            {row.value.toLocaleString()}
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-slate-500 whitespace-nowrap w-20">{row.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Lead Source */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Lead Source</h3>
+                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Month</option></select>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-32 h-32 flex-shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={[
+                            { name: 'WhatsApp', value: 40 },
+                            { name: 'Website', value: 25 },
+                            { name: 'Facebook', value: 15 },
+                            { name: 'Referral', value: 10 },
+                            { name: 'Other', value: 10 },
+                          ]} cx="50%" cy="50%" innerRadius={38} outerRadius={55} dataKey="value" paddingAngle={2}>
+                            {['#1a6b2a','#4ade80','#fbbf24','#818cf8','#94a3b8'].map((c,i) => <Cell key={i} fill={c}/>)}
+                          </Pie>
+                          <text x="50%" y="46%" textAnchor="middle" dominantBaseline="middle" className="text-xs" fill="#64748b" fontSize={9}>Total</text>
+                          <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" fill="#1e293b" fontSize={13} fontWeight="bold">{(leads.length||2458).toLocaleString()}</text>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex-1 space-y-1.5 text-xs">
+                      {[
+                        { label: 'WhatsApp', pct: 40, color: '#1a6b2a' },
+                        { label: 'Website', pct: 25, color: '#4ade80' },
+                        { label: 'Facebook', pct: 15, color: '#fbbf24' },
+                        { label: 'Referral', pct: 10, color: '#818cf8' },
+                        { label: 'Other', pct: 10, color: '#94a3b8' },
+                      ].map((s,i) => (
+                        <div key={i} className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }}></span>
+                            <span className="text-slate-600 dark:text-slate-400">{s.label}</span>
+                          </div>
+                          <span className="font-bold text-slate-700 dark:text-slate-300">{s.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── ROW 3: RECENT ADMISSIONS + SCHEDULE + LIVE ACTIVITIES ── */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                {/* Recent Admissions Table */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Recent Admissions</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-[11px]">
+                      <thead>
+                        <tr className="text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                          {['Student Name','College / University','Course','Amount','Counsellor','Date','Status'].map(h => (
+                            <th key={h} className="text-left pb-2 font-semibold pr-2">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="space-y-1">
+                        {[
+                          { name: 'Aarav Kumar', college: 'Patliputra University', course: 'B.Ed', amount: '₹45,000', counsellor: 'Rohit Kumar', date: '14 Jun 2026', status: 'Confirmed', color: 'A', bg: 'bg-blue-500' },
+                          { name: 'Sneha Kumari', college: 'Lalit Narayan Mithila University', course: 'MBA', amount: '₹78,000', counsellor: 'Neha Singh', date: '14 Jun 2026', status: 'Confirmed', color: 'S', bg: 'bg-emerald-500' },
+                          { name: 'Vikash Ranjan', college: 'Aryabhatta Knowledge University', course: 'B.Tech', amount: '₹1,25,000', counsellor: 'Pankaj Kumar', date: '13 Jun 2026', status: 'Pending', color: 'V', bg: 'bg-orange-400' },
+                          { name: 'Muskan Priya', college: 'Veer Kunwar Singh University', course: 'B.Sc (Nursing)', amount: '₹65,000', counsellor: 'Neha Singh', date: '13 Jun 2026', status: 'Confirmed', color: 'M', bg: 'bg-purple-500' },
+                          { name: 'Rohit Raj', college: 'Bhupendra Narayan Mandal University', course: 'B.Com', amount: '₹35,000', counsellor: 'Rohit Kumar', date: '12 Jun 2026', status: 'Pending', color: 'R', bg: 'bg-rose-400' },
+                          ...leads.filter(l => l.pipelineStage === 'Confirmed').slice(0,3).map(l => ({ name: l.name, college: l.preferredCollege || '—', course: l.preferredCourse || '—', amount: l.budget ? `₹${l.budget.toLocaleString('en-IN')}` : '—', counsellor: l.counsellor?.username || '—', date: new Date(l.updatedAt).toLocaleDateString('en-IN'), status: 'Confirmed', color: l.name[0], bg: 'bg-teal-500' }))
+                        ].slice(0,6).map((row, i) => (
+                          <tr key={i} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                            <td className="py-2 pr-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`w-6 h-6 rounded-full ${row.bg} text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0`}>{row.color}</span>
+                                <span className="font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{row.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-2 pr-2 text-slate-500 max-w-[140px] truncate">{row.college}</td>
+                            <td className="py-2 pr-2 text-slate-500">{row.course}</td>
+                            <td className="py-2 pr-2 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{row.amount}</td>
+                            <td className="py-2 pr-2 text-slate-500 whitespace-nowrap">{row.counsellor}</td>
+                            <td className="py-2 pr-2 text-slate-400 whitespace-nowrap">{row.date}</td>
+                            <td className="py-2">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${ row.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }`}>{row.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
+                    View all admissions <span>→</span>
+                  </button>
+                </div>
+
+                {/* Today's Schedule */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Today's Schedule</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { time: '10:00 AM', type: 'Follow up call', detail: 'Student: Aarav Kumar', icon: '📞', color: 'bg-blue-100 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/40' },
+                      { time: '11:30 AM', type: 'Counselling Session', detail: 'Student: Sneha Kumar', icon: '🧑‍💼', color: 'bg-emerald-100 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40' },
+                      { time: '02:00 PM', type: 'University Meeting', detail: 'LNMU Collaboration', icon: '🏫', color: 'bg-purple-100 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800/40' },
+                      { time: '04:00 PM', type: 'Follow up call', detail: 'Student: Vikash Ranjan', icon: '📞', color: 'bg-orange-100 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800/40' },
+                    ].map((s, i) => (
+                      <div key={i} className={`flex gap-3 p-2.5 rounded-lg border ${s.color}`}>
+                        <div className="text-center">
+                          <div className="text-[9px] text-slate-400 font-semibold whitespace-nowrap">{s.time}</div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            <span>{s.icon}</span> {s.type}
+                          </div>
+                          <div className="text-[9px] text-slate-500 mt-0.5">{s.detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
+                    View full calendar <span>→</span>
+                  </button>
+                </div>
+
+                {/* Live Activities */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Live Activities</h3>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { msg: 'New lead received from website', sub: 'by Rohit Kumar', time: '5 min ago', icon: '🟢', color: 'bg-emerald-50 dark:bg-emerald-950/20' },
+                      { msg: 'Payment of ₹45,000 received', sub: 'from Aarav Kumar', time: '15 min ago', icon: '💰', color: 'bg-amber-50 dark:bg-amber-950/20' },
+                      { msg: 'Admission confirmed for Sneha Kumari', sub: 'B.Ed – Patliputra University', time: '30 min ago', icon: '✅', color: 'bg-blue-50 dark:bg-blue-950/20' },
+                      { msg: 'Follow up scheduled with Vikash Ranjan', sub: 'by Neha Singh', time: '45 min ago', icon: '📅', color: 'bg-purple-50 dark:bg-purple-950/20' },
+                      { msg: 'New counsellor Pankaj Kumar added', sub: 'by Super Admin', time: '1 hour ago', icon: '👤', color: 'bg-slate-50 dark:bg-slate-800/40' },
+                    ].map((a, i) => (
+                      <div key={i} className={`flex gap-2.5 p-2 rounded-lg ${a.color}`}>
+                        <span className="text-sm flex-shrink-0 mt-0.5">{a.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 leading-tight">{a.msg}</p>
+                          <p className="text-[9px] text-slate-400 mt-0.5">{a.sub}</p>
+                        </div>
+                        <span className="text-[8px] text-slate-400 whitespace-nowrap flex-shrink-0">{a.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
+                    View all activities <span>→</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* ── ROW 4: REVENUE + TOP COUNSELLORS + ADMISSIONS BY COURSE + AI INSIGHTS ── */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                {/* Revenue Overview */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Revenue Overview</h3>
+                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Year</option><option>This Month</option></select>
+                  </div>
+                  <div className="h-40">
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: 'WhatsApp', value: 35 },
-                            { name: 'Website', value: 30 },
-                            { name: 'Facebook', value: 20 },
-                            { name: 'Referral', value: 15 },
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          <Cell fill="#3b82f6" />
-                          <Cell fill="#10b981" />
-                          <Cell fill="#f59e0b" />
-                          <Cell fill="#8b5cf6" />
-                        </Pie>
-                        <Tooltip />
-                        <Legend wrapperStyle={{ fontSize: 11 }} />
-                      </PieChart>
+                      <BarChart data={[
+                        { month: 'Jan', rev: 180000 },
+                        { month: 'Feb', rev: 220000 },
+                        { month: 'Mar', rev: 195000 },
+                        { month: 'Apr', rev: 280000 },
+                        { month: 'May', rev: 310000 },
+                        { month: 'Jun', rev: accountingStats?.summary?.totalIncome || 245860 },
+                      ]} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.08} vertical={false}/>
+                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={9} tickLine={false}/>
+                        <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} tickFormatter={v => `${(v/1000).toFixed(0)}k`}/>
+                        <Tooltip formatter={(v:any) => `₹${Number(v).toLocaleString('en-IN')}`} contentStyle={{ fontSize: 10, borderRadius: 8 }}/>
+                        <Bar dataKey="rev" fill="#1a6b2a" radius={[4,4,0,0]} />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-              </div>
 
-              {/* CRM Leads Stats (Target vs conversion) & Activity Log */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Counsellor metrics */}
-                <div className="glass-card p-6 rounded-2xl border border-slate-200/40 dark:border-slate-800/30">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-sm text-slate-500 uppercase">Counsellor Payout Performance</h3>
-                    <Users size={16} className="text-slate-400" />
+                {/* Top Performing Counsellors */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Top Performing Counsellors</h3>
                   </div>
-                  {counsellorStats ? (
-                    <div className="space-y-4 text-xs font-semibold">
-                      <div className="flex justify-between p-3 rounded-lg bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40">
-                        <span>Leads Assigned:</span>
-                        <span>{counsellorStats.totalLeads}</span>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Rohit Kumar', admissions: 152, revenue: '₹ 12,45,000', medal: '🥇', bg: 'bg-amber-100 dark:bg-amber-950/30' },
+                      { name: 'Neha Singh', admissions: 98, revenue: '₹ 8,25,000', medal: '🥈', bg: 'bg-slate-100 dark:bg-slate-800/40' },
+                      { name: 'Pankaj Kumar', admissions: 70, revenue: '₹ 5,45,000', medal: '🥉', bg: 'bg-orange-100 dark:bg-orange-950/20' },
+                    ].map((c, i) => (
+                      <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg ${c.bg}`}>
+                        <span className="text-xl">{c.medal}</span>
+                        <div className="w-8 h-8 rounded-full bg-[#1a6b2a]/20 flex items-center justify-center text-xs font-bold text-[#1a6b2a]">{c.name[0]}</div>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{c.name}</p>
+                          <p className="text-[9px] text-slate-400">{c.admissions} Admissions</p>
+                        </div>
+                        <span className="text-xs font-extrabold text-[#1a6b2a]">{c.revenue}</span>
                       </div>
-                      <div className="flex justify-between p-3 rounded-lg bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40">
-                        <span>Active Reminders:</span>
-                        <span>{counsellorStats.activeFollowups}</span>
-                      </div>
-                      <div className="flex justify-between p-3 rounded-lg bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40">
-                        <span>Month Target Achieved:</span>
-                        <span>{counsellorStats.confirmedAdmissions} / {counsellorStats.targetAdmissions} seats</span>
-                      </div>
-                      <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-emerald-500 h-full rounded-full" 
-                          style={{ width: `${(counsellorStats.confirmedAdmissions / counsellorStats.targetAdmissions) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-slate-400 text-xs">Loading performance cards...</p>
-                  )}
+                    ))}
+                  </div>
+                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
+                    View all counsellors <span>→</span>
+                  </button>
                 </div>
 
-                {/* Audit Logs */}
-                <div className="glass-card p-6 rounded-2xl border border-slate-200/40 dark:border-slate-800/30">
-                  <h3 className="font-bold text-sm text-slate-500 uppercase mb-4">Live Security Audit Logs</h3>
-                  <div className="space-y-3 max-h-48 overflow-y-auto text-xs">
-                    <div className="flex items-start space-x-2.5 p-2 bg-slate-100/40 dark:bg-slate-900/40 rounded-lg border border-slate-200/30 dark:border-slate-800/30">
-                      <ShieldCheck size={14} className="text-emerald-500 mt-0.5" />
-                      <div>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold">User {currentUser?.email} logged in successfully</p>
-                        <span className="text-[10px] text-slate-400">IP: 192.168.1.84 • Device: Windows Edge • 10m ago</span>
-                      </div>
+                {/* Admissions by Course */}
+                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-bold text-sm">Admissions by Course</h3>
+                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Month</option></select>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-28 h-28 flex-shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={[
+                            { name: 'B.Ed', value: 35 },
+                            { name: 'MBA', value: 20 },
+                            { name: 'B.Tech', value: 18 },
+                            { name: 'B.Sc', value: 15 },
+                            { name: 'Other', value: 12 },
+                          ]} cx="50%" cy="50%" innerRadius={32} outerRadius={50} dataKey="value" paddingAngle={2}>
+                            {['#1a6b2a','#4ade80','#fbbf24','#818cf8','#94a3b8'].map((c,i) => <Cell key={i} fill={c}/>)}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
                     </div>
-                    <div className="flex items-start space-x-2.5 p-2 bg-slate-100/40 dark:bg-slate-900/40 rounded-lg border border-slate-200/30 dark:border-slate-800/30">
-                      <UserCheck size={14} className="text-blue-500 mt-0.5" />
-                      <div>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold">Lead stage updated: Aarav Gupta ➔ Counselling</p>
-                        <span className="text-[10px] text-slate-400">By Aditi Sharma • 1h ago</span>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-2.5 p-2 bg-slate-100/40 dark:bg-slate-900/40 rounded-lg border border-slate-200/30 dark:border-slate-800/30">
-                      <FileBadge size={14} className="text-indigo-500 mt-0.5" />
-                      <div>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold">Commission Invoice INV-KIIT-A09 matched & closed</p>
-                        <span className="text-[10px] text-slate-400">By Suresh Iyer • 3h ago</span>
-                      </div>
+                    <div className="flex-1 space-y-1.5">
+                      {[
+                        { label: 'B.Ed', pct: 35, color: '#1a6b2a' },
+                        { label: 'MBA', pct: 20, color: '#4ade80' },
+                        { label: 'B.Tech', pct: 18, color: '#fbbf24' },
+                        { label: 'B.Sc', pct: 15, color: '#818cf8' },
+                        { label: 'Other', pct: 12, color: '#94a3b8' },
+                      ].map((s,i) => (
+                        <div key={i} className="flex items-center justify-between text-[10px]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }}></span>
+                            <span className="text-slate-600 dark:text-slate-400">{s.label}</span>
+                          </div>
+                          <span className="font-bold text-slate-700 dark:text-slate-300">{s.pct}%</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
+
               </div>
+
             </div>
           )}
+
           {/* FINANCE & REVENUE DASHBOARD — Director Finance Only */}
           {activeTab === 'dashboard-finance' && isDirectorFinance && (
             <div className="space-y-6">
