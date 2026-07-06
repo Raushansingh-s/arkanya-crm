@@ -453,13 +453,14 @@ export default function App() {
   // CRM: Update Full Lead Profile
   const updateLeadDetails = async (leadId: string, updatedFields: any) => {
     try {
+      const { id, counsellor, followups, createdAt, updatedAt, ...sanitized } = updatedFields;
       const res = await fetch(`${API_URL}/api/crm/leads/${leadId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`
         },
-        body: JSON.stringify(updatedFields)
+        body: JSON.stringify(sanitized)
       });
       if (res.ok) {
         fetchMasterData();
@@ -476,13 +477,14 @@ export default function App() {
   // Student Profile: Update own lead record from student portal
   const updateStudentLead = async (leadId: string, updatedFields: any) => {
     try {
+      const { id, counsellor, followups, createdAt, updatedAt, ...sanitized } = updatedFields;
       const res = await fetch(`${API_URL}/api/crm/leads/${leadId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`
         },
-        body: JSON.stringify(updatedFields)
+        body: JSON.stringify(sanitized)
       });
       if (res.ok) {
         fetchProfile();

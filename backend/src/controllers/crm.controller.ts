@@ -114,13 +114,24 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
     const { id } = req.params;
     const data = req.body;
 
+    // Destructure to remove ID, relations, and timestamps from database update data
+    const {
+      id: _,
+      tenantId,
+      createdAt,
+      updatedAt,
+      counsellor,
+      followups,
+      ...updateData
+    } = data;
+
     const lead = await prisma.lead.update({
       where: { id },
       data: {
-        ...data,
-        marksPercentage: data.marksPercentage ? parseFloat(data.marksPercentage) : undefined,
-        budget: data.budget ? parseFloat(data.budget) : undefined,
-        leadScore: data.leadScore ? parseInt(data.leadScore) : undefined,
+        ...updateData,
+        marksPercentage: updateData.marksPercentage ? parseFloat(updateData.marksPercentage) : undefined,
+        budget: updateData.budget ? parseFloat(updateData.budget) : undefined,
+        leadScore: updateData.leadScore ? parseInt(updateData.leadScore) : undefined,
       }
     });
 
