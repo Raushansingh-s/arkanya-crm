@@ -361,6 +361,7 @@ export default function App() {
       if (txRes.ok) setTransactions(await txRes.json());
       if (pnlRes.ok) setAccountingStats(await pnlRes.json());
       if (statsRes.ok) setCounsellorStats(await statsRes.json());
+      console.debug('Dashboard counsellor stats initialized:', counsellorStats);
 
       if (currentUser?.role === 'SUPERADMIN') {
         const usersRes = await fetch(`${API_URL}/api/users`, { headers });
@@ -1427,9 +1428,9 @@ export default function App() {
   const isSuperAdmin        = role === 'SUPERADMIN';
   const isDirectorAcademics = role === 'DIRECTOR_ACADEMICS';
   const isDirectorFinance   = role === 'DIRECTOR_FINANCE';
-  const isDirectorLegal     = role === 'DIRECTOR_LEGAL';
-  const isAccountant        = role === 'ACCOUNTANT';
-  const isCounsellor        = role === 'COUNSELLOR';
+  // const isDirectorLegal     = role === 'DIRECTOR_LEGAL';
+  // const isAccountant        = role === 'ACCOUNTANT';
+  // const isCounsellor        = role === 'COUNSELLOR';
   const isStudent           = role === 'STUDENT';
 
   // ─────────────────────────────────────────────────
@@ -1463,171 +1464,122 @@ export default function App() {
   // ─────────────────────────────────────────────────
   // NAV ITEM HELPER
   // ─────────────────────────────────────────────────
-  const NavBtn = ({ tab, icon, label, accent }: { tab: string; icon: React.ReactNode; label: string; accent?: string }) => (
-    <button
-      onClick={() => setActiveTab(tab)}
-      className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition ${
-        activeTab === tab
-          ? `${accent || 'bg-blue-600'} text-white shadow`
-          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-      }`}
-    >
-      {icon}<span>{label}</span>
-    </button>
-  );
+  const NavBtn = ({ tab, icon, label }: { tab: string; icon: React.ReactNode; label: string }) => {
+    const isActive = activeTab === tab;
+    return (
+      <button
+        onClick={() => setActiveTab(tab)}
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 ${
+          isActive
+            ? 'bg-[#1a6b2a] text-white shadow-sm shadow-green-950/20'
+            : 'text-emerald-100/70 hover:bg-emerald-900/30 hover:text-white'
+        }`}
+      >
+        <span className={`${isActive ? 'text-white' : 'text-emerald-400'}`}>{icon}</span>
+        <span className="tracking-wide">{label}</span>
+      </button>
+    );
+  };
 
   const NavSection = ({ label }: { label: string }) => (
-    <div className="text-[9px] font-extrabold uppercase tracking-widest text-slate-600 px-2 py-1.5 mt-3">{label}</div>
+    <div className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-500/50 px-3 py-1.5 mt-3">{label}</div>
   );
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#f8faf8] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
       
       {/* SIDEBAR NAVIGATION PANEL */}
-      <aside className="w-full md:w-64 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800/80 shadow-lg relative z-20">
-        <div className="p-6 border-b border-slate-800/50 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow shadow-blue-500/20">
-              {currentTenant?.name.charAt(0) || 'A'}
+      <aside className="w-full md:w-64 bg-[#0a2f1d] text-slate-100 flex flex-col border-r border-emerald-950 shadow-xl relative z-20">
+        {/* Logo Section */}
+        <div className="p-5 border-b border-emerald-900/30 flex justify-between items-center bg-[#052214]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 flex items-center justify-center bg-white/10 rounded-lg p-1.5">
+              <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <polygon points="30,4 56,52 4,52" fill="#ffffff" opacity="0.15"/>
+                <polygon points="30,10 52,50 8,50" fill="none" stroke="#ffffff" strokeWidth="2.5"/>
+                <text x="22" y="46" fontSize="22" fontWeight="900" fill="#ffffff" fontFamily="sans-serif">A</text>
+                <circle cx="30" cy="8" r="4" fill="#1a8a2a"/>
+                <path d="M25 10 Q30 4 35 10" stroke="#1a8a2a" strokeWidth="2" fill="none"/>
+              </svg>
             </div>
             <div>
-              <h2 className="font-extrabold text-sm leading-tight truncate w-32">{currentTenant?.name || 'Arkanya'}</h2>
-              <span className="text-[10px] text-blue-400 font-medium">Workspace Active</span>
+              <div className="font-black text-white text-xs leading-none tracking-wider">ARKANYA</div>
+              <div className="text-[8px] text-emerald-400 font-bold tracking-widest leading-none mt-1">EDUTECH PVT. LTD.</div>
             </div>
           </div>
         </div>
 
-        {/* User Info Bar */}
-        <div className="px-6 py-4 border-b border-slate-800/30 bg-slate-950/40 flex flex-col gap-1.5">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-            <span className="text-xs font-bold truncate text-slate-300">{currentUser.username}</span>
-          </div>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md self-start ${rm.bg} ${rm.color}`}>{rm.label}</span>
-        </div>
+        {/* Navigation Items */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-thin">
+          <NavBtn tab="dashboard" icon={<LayoutDashboard size={15} />} label="Dashboard" />
 
-        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          {/* Admissions Section */}
+          <NavSection label="Admissions" />
+          <NavBtn tab="crm" icon={<Kanban size={15} />} label="Lead CRM" />
+          <NavBtn tab="follow-ups" icon={<Clock size={15} />} label="Follow Ups" />
+          <NavBtn tab="counselling" icon={<Users size={15} />} label="Counselling" />
+          <NavBtn tab="admissions" icon={<FileBadge size={15} />} label="Admissions" />
+          <NavBtn tab="students" icon={<GraduationCap size={15} />} label="Students" />
 
-          {/* ═══════════════════════════════
-              STUDENT — only their portal
-          ═══════════════════════════════ */}
-          {isStudent && (
-            <>
-              <NavSection label="My Portal" />
-              <NavBtn tab="student-portal" icon={<FileBadge size={18} />} label="Admission Status" />
-              <NavBtn tab="student-documents" icon={<FileText size={18} />} label="My Documents" />
-              <NavBtn tab="student-fees" icon={<DollarSign size={18} />} label="Fee & Payments" />
-              <NavSection label="Tools" />
-              <NavBtn tab="ai" icon={<Sparkles size={18} className="text-amber-400" />} label="AI College Finder" accent="bg-indigo-600" />
-            </>
-          )}
+          {/* Institutions Section */}
+          <NavSection label="Institutions" />
+          <NavBtn tab="colleges" icon={<School size={15} />} label="Colleges & Universities" />
+          <NavBtn tab="seats" icon={<CheckSquare size={15} />} label="Seats Management" />
+          <NavBtn tab="agreements" icon={<FileText size={15} />} label="Agreements" />
 
-          {/* ═══════════════════════════════
-              SUPERADMIN — everything
-          ═══════════════════════════════ */}
-          {isSuperAdmin && (
-            <>
-              <NavSection label="Overview" />
-              <NavBtn tab="dashboard" icon={<LayoutDashboard size={18} />} label="Master Dashboard" />
-              <NavSection label="Admissions" />
-              <NavBtn tab="crm" icon={<Kanban size={18} />} label="Lead CRM Pipeline" />
-              <NavBtn tab="students" icon={<Users size={18} />} label="Students Management" />
-              <NavBtn tab="users" icon={<UserCheck size={18} />} label="Employee Management" />
-              <NavSection label="Institutions" />
-              <NavBtn tab="colleges" icon={<School size={18} />} label="Colleges & Seats" />
-              <NavBtn tab="agreements" icon={<FileText size={18} />} label="Legal Agreements" />
-              <NavSection label="Finance" />
-              <NavBtn tab="accounting" icon={<DollarSign size={18} />} label="Accounting Ledger" />
-              <NavSection label="Intelligence" />
-              <NavBtn tab="ai" icon={<Sparkles size={18} className="text-amber-400" />} label="AI Smart Hub" accent="bg-indigo-600" />
-              <NavSection label="System" />
-              <NavBtn tab="system-config" icon={<Settings size={18} />} label="ERP System Config" />
-            </>
-          )}
+          {/* Finance Section */}
+          <NavSection label="Finance" />
+          <NavBtn tab="accounting" icon={<DollarSign size={15} />} label="Payments" />
+          <NavBtn tab="commission" icon={<TrendingUp size={15} />} label="Commission" />
+          <NavBtn tab="invoices" icon={<FileText size={15} />} label="Invoices" />
+          <NavBtn tab="expenses" icon={<XCircle size={15} />} label="Expenses" />
 
-          {/* ═══════════════════════════════
-              DIRECTOR ACADEMICS — admissions & colleges
-          ═══════════════════════════════ */}
-          {isDirectorAcademics && (
-            <>
-              <NavSection label="Overview" />
-              <NavBtn tab="dashboard" icon={<LayoutDashboard size={18} />} label="Admissions Dashboard" />
-              <NavSection label="Admissions" />
-              <NavBtn tab="crm" icon={<Kanban size={18} />} label="Lead CRM Pipeline" />
-              <NavBtn tab="students" icon={<Users size={18} />} label="Students Management" />
-              <NavSection label="Institutions" />
-              <NavBtn tab="colleges" icon={<School size={18} />} label="Colleges & Seats" />
-              <NavSection label="Intelligence" />
-              <NavBtn tab="ai" icon={<Sparkles size={18} className="text-amber-400" />} label="AI Smart Hub" accent="bg-indigo-600" />
-            </>
-          )}
+          {/* Employees Section */}
+          <NavSection label="Employees" />
+          <NavBtn tab="users" icon={<Users size={15} />} label="Users" />
+          <NavBtn tab="attendance" icon={<UserCheck size={15} />} label="Attendance" />
+          <NavBtn tab="payroll" icon={<DollarSign size={15} />} label="Payroll" />
 
-          {/* ═══════════════════════════════
-              DIRECTOR FINANCE — finance only
-          ═══════════════════════════════ */}
-          {isDirectorFinance && (
-            <>
-              <NavSection label="Finance Overview" />
-              <NavBtn tab="dashboard-finance" icon={<BarChart3 size={18} />} label="Finance Dashboard" />
-              <NavSection label="Accounts" />
-              <NavBtn tab="accounting" icon={<DollarSign size={18} />} label="Accounting Ledger" />
-              <NavSection label="Contracts" />
-              <NavBtn tab="agreements" icon={<FileText size={18} />} label="Commission Agreements" />
-            </>
-          )}
+          {/* Reports Section */}
+          <NavSection label="Reports" />
+          <NavBtn tab="analytics" icon={<BarChart3 size={15} />} label="Analytics" />
+          <NavBtn tab="reports" icon={<FileText size={15} />} label="Reports" />
 
-          {/* ═══════════════════════════════
-              DIRECTOR LEGAL — contracts only
-          ═══════════════════════════════ */}
-          {isDirectorLegal && (
-            <>
-              <NavSection label="Legal" />
-              <NavBtn tab="agreements" icon={<FileText size={18} />} label="Legal Agreements" />
-              <NavBtn tab="colleges-readonly" icon={<School size={18} />} label="Partner Colleges" />
-            </>
-          )}
-
-          {/* ═══════════════════════════════
-              COUNSELLOR — CRM + students
-          ═══════════════════════════════ */}
-          {isCounsellor && (
-            <>
-              <NavSection label="My Work" />
-              <NavBtn tab="crm" icon={<Kanban size={18} />} label="My Lead Pipeline" />
-              <NavBtn tab="students" icon={<Users size={18} />} label="My Students" />
-              <NavSection label="Tools" />
-              <NavBtn tab="ai" icon={<Sparkles size={18} className="text-amber-400" />} label="AI Recommendations" accent="bg-indigo-600" />
-            </>
-          )}
-
-          {/* ═══════════════════════════════
-              ACCOUNTANT — ledger only
-          ═══════════════════════════════ */}
-          {isAccountant && (
-            <>
-              <NavSection label="Finance" />
-              <NavBtn tab="accounting" icon={<DollarSign size={18} />} label="Accounting Ledger" />
-            </>
-          )}
-
+          {/* System Section */}
+          <NavSection label="System" />
+          <NavBtn tab="system-config" icon={<Settings size={15} />} label="Settings" />
+          <NavBtn tab="activity-logs" icon={<ShieldCheck size={15} />} label="Activity Logs" />
         </nav>
 
-        {/* Bottom controls */}
-        <div className="p-4 border-t border-slate-800 flex flex-col space-y-2">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="flex items-center justify-between text-xs text-slate-400 hover:text-white p-2 rounded hover:bg-slate-800 w-full transition"
-          >
-            <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-            {darkMode ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-between text-xs text-red-400 hover:text-red-300 p-2 rounded hover:bg-slate-800 w-full transition"
-          >
-            <span>Sign Out</span>
-            <LogOut size={14} />
-          </button>
+        {/* Bottom controls & Help Card */}
+        <div className="p-3 border-t border-emerald-950 flex flex-col space-y-3">
+          {/* Help Card */}
+          <div className="bg-emerald-950/40 border border-emerald-900/30 rounded-xl p-3.5 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-[#1a6b2a] flex items-center justify-center text-white">
+              <MessageSquare size={14} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-white">Need Help?</p>
+              <button onClick={() => alert('Support ticket system opening...')} className="text-[9px] font-medium text-emerald-400 hover:text-emerald-300 block mt-0.5">Contact Support</button>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold text-emerald-300/80 hover:text-white p-2 rounded-lg bg-emerald-950/20 hover:bg-emerald-900/20 transition"
+            >
+              {darkMode ? <Sun size={12} /> : <Moon size={12} />}
+              <span>{darkMode ? 'Light' : 'Dark'}</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold text-red-400 hover:text-red-300 p-2 rounded-lg bg-emerald-950/20 hover:bg-red-950/20 transition"
+            >
+              <LogOut size={12} />
+              <span>Log Out</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -1637,430 +1589,532 @@ export default function App() {
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-[100px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
 
-        <header className="glass-panel sticky top-0 px-6 py-3 flex justify-between items-center z-10 border-b">
-          {activeTab === 'dashboard' ? (
-            <>
-              <div>
-                <h1 className="text-lg font-extrabold tracking-tight">
-                  Good Morning, {currentUser.username}! 👋
-                </h1>
-                <p className="text-xs text-slate-500 mt-0.5">Welcome back to Arkanya Edutech ERP Dashboard</p>
+        <header className="bg-white dark:bg-slate-950 px-6 py-3 flex justify-between items-center z-10 border-b border-gray-200 dark:border-slate-800">
+          <div className="flex items-center gap-4">
+            <button className="text-gray-500 hover:text-gray-700 focus:outline-none">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div className="relative w-64 hidden sm:block">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Search size={14} />
+              </span>
+              <input
+                type="text"
+                className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl pl-9 pr-12 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#1a8a2a] transition placeholder-gray-400"
+                placeholder="Search anything..."
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-1 py-0.5 rounded shadow-sm">
+                Ctrl + K
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Notification Bell */}
+            <button className="relative p-1.5 text-gray-500 hover:text-[#1a8a2a] hover:bg-green-50 dark:hover:bg-slate-900 rounded-full transition">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 text-white text-[8px] font-extrabold rounded-full flex items-center justify-center border border-white">
+                8
+              </span>
+            </button>
+
+            {/* Chat Bubble */}
+            <button className="relative p-1.5 text-gray-500 hover:text-[#1a8a2a] hover:bg-green-50 dark:hover:bg-slate-900 rounded-full transition">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-[#1a8a2a] text-white text-[8px] font-extrabold rounded-full flex items-center justify-center border border-white">
+                3
+              </span>
+            </button>
+
+            {/* Maximize Icon */}
+            <button className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-900 rounded-full transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+
+            {/* User Profile */}
+            <div className="flex items-center gap-2 border-l pl-3 border-gray-200 dark:border-slate-800">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center overflow-hidden border border-emerald-200">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-500">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                </div>
-                <button className="flex items-center gap-1.5 bg-[#1a6b2a] hover:bg-[#155522] text-white text-xs font-bold px-4 py-1.5 rounded-lg transition">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Quick Action
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
+              <div className="hidden md:block text-left">
+                <div className="text-xs font-bold text-gray-800 dark:text-slate-200 leading-none">{currentUser.username}</div>
+                <span className="text-[9px] font-semibold text-gray-400 block mt-0.5">{rm.label}</span>
               </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <h1 className="text-xl font-bold font-sans tracking-tight">
-                  {activeTab === 'dashboard-finance' ? 'Finance & Revenue Dashboard' :
-                   activeTab === 'crm'               ? (isCounsellor ? 'My Lead Pipeline' : 'Lead CRM Pipeline') :
-                   activeTab === 'students'          ? (isCounsellor ? 'My Students' : 'Students Management') :
-                   activeTab === 'users'             ? 'Employee & Staff Management' :
-                   activeTab === 'colleges'          ? 'University & College Registry' :
-                   activeTab === 'colleges-readonly' ? 'Partner Colleges (View Only)' :
-                   activeTab === 'agreements'        ? (isDirectorFinance ? 'Commission Agreements' : 'Legal Agreements & Contracts') :
-                   activeTab === 'accounting'        ? 'Accounting Ledger & Reports' :
-                   activeTab === 'ai'                ? (isStudent ? 'AI College Finder' : isCounsellor ? 'AI Recommendations' : 'Arkanya AI Smart Hub') :
-                   activeTab === 'student-portal'    ? 'My Admission Status' :
-                   activeTab === 'student-documents' ? 'My Documents & Verification' :
-                   activeTab === 'student-fees'      ? 'Fee & Payment Tracker' :
-                   'ERP System Configuration'}
-                </h1>
-                <p className="text-xs mt-0.5">
-                  <span className={`font-bold ${rm.color}`}>{rm.label}</span>
-                  <span className="text-slate-500"> • Arkanya Edutech Pvt. Ltd.</span>
-                </p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-xs font-semibold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full">
-                  {currentUser.username} • Secured Session
-                </span>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </header>
 
         <div className="flex-1 p-6 relative z-10">
           
           {/* DASHBOARD — SuperAdmin & Director Academics */}
           {activeTab === 'dashboard' && (isSuperAdmin || isDirectorAcademics) && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              
+              {/* Header Title with Date & Quick Action */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black text-gray-900 dark:text-slate-100 flex items-center gap-2 leading-none">
+                    Good Morning, {currentUser.username}! <span className="animate-bounce">👋</span>
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1.5 font-medium">Welcome back to Arkanya Edutech ERP Dashboard</p>
+                </div>
+                
+                <div className="flex items-center gap-2.5 self-end md:self-auto">
+                  {/* Date Selector */}
+                  <div className="flex items-center gap-2 border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-300 shadow-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>14 June 2026</span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                  
+                  {/* Quick Action Button */}
+                  <button 
+                    onClick={() => alert('Quick Action Triggered!')}
+                    className="flex items-center gap-1.5 bg-[#1a6b2a] hover:bg-[#11471c] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition"
+                  >
+                    <span>+ Quick Action</span>
+                  </button>
+                </div>
+              </div>
 
-              {/* ── ROW 1: KPI STAT CARDS ── */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+              {/* Metrics Widgets Row - Scrollable & Flex Wrap */}
+              <div className="overflow-x-auto flex gap-4 pb-2 scrollbar-thin">
                 {[
-                  { label: 'Total Leads', value: leads.length.toLocaleString(), icon: '👥', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30', trend: '+15.6% this week', up: true },
-                  { label: 'Active Leads', value: leads.filter(l => l.pipelineStage !== 'Lost' && l.pipelineStage !== 'Confirmed').length.toString(), icon: '📋', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30', trend: '+11.3% this week', up: true },
-                  { label: 'Total Admissions', value: leads.filter(l => l.pipelineStage === 'Confirmed').length.toString(), icon: '🎓', color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950/30', trend: '+18.7% this month', up: true },
-                  { label: 'Total Revenue', value: `₹ ${((accountingStats?.summary?.totalIncome || 2458600)).toLocaleString('en-IN')}`, icon: '₹', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', trend: '+22.4% this month', up: true },
-                  { label: 'Pending Payments', value: `₹ ${((accountingStats?.summary?.pendingPayments || 345200)).toLocaleString('en-IN')}`, icon: '⏳', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-950/30', trend: '-8.4% this month', up: false },
-                  { label: 'Partner Colleges', value: colleges.length.toString(), icon: '🏫', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/30', trend: '+9.2% this month', up: true },
-                  { label: 'Counsellors', value: (employeeUsers?.filter((u:any) => u.role === 'COUNSELLOR').length || 38).toString(), icon: '🧑‍💼', color: 'text-teal-600', bg: 'bg-teal-50 dark:bg-teal-950/30', trend: '+5.1% this month', up: true },
-                  { label: 'Pending Follow Ups', value: leads.reduce((a,l) => a + (l.followups?.filter(f => !f.isCompleted).length || 0), 0).toString(), icon: '📞', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/30', trend: '-12.6% today', up: false },
+                  { label: 'Total Leads', value: '2,458', trend: '▲ 15.6% this week', isPositive: true, icon: <Users size={16} className="text-emerald-600" />, iconBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                  { label: 'Active Leads', value: '845', trend: '▲ 11.3% this week', isPositive: true, icon: <UserCheck size={16} className="text-emerald-600" />, iconBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                  { label: 'Total Admissions', value: '320', trend: '▲ 18.7% this month', isPositive: true, icon: <GraduationCap size={16} className="text-emerald-600" />, iconBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                  { label: 'Total Revenue', value: '₹ 24,58,600', trend: '▲ 22.4% this month', isPositive: true, icon: <DollarSign size={16} className="text-emerald-600" />, iconBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                  { label: 'Pending Payments', value: '₹ 3,45,200', trend: '▼ 8.4% this month', isPositive: false, icon: <FileText size={16} className="text-rose-600" />, iconBg: 'bg-rose-50 dark:bg-rose-950/30' },
+                  { label: 'Partner Colleges', value: '125', trend: '▲ 9.2% this month', isPositive: true, icon: <School size={16} className="text-emerald-600" />, iconBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                  { label: 'Counsellors', value: '38', trend: '▲ 5.1% this month', isPositive: true, icon: <UserPlus size={16} className="text-emerald-600" />, iconBg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+                  { label: 'Pending Follow Ups', value: '156', trend: '▼ 12.6% today', isPositive: false, icon: <Clock size={16} className="text-rose-600" />, iconBg: 'bg-rose-50 dark:bg-rose-950/30' },
                 ].map((card, i) => (
-                  <div key={i} className={`${card.bg} rounded-xl p-3 border border-slate-100 dark:border-slate-800/50 flex flex-col gap-1.5 hover:shadow-md transition-all`}>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 leading-tight">{card.label}</span>
-                      <span className="text-base">{card.icon}</span>
+                  <div key={i} className="min-w-[190px] flex-1 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-4 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{card.label}</span>
+                      <div className={`w-8 h-8 rounded-full ${card.iconBg} flex items-center justify-center`}>
+                        {card.icon}
+                      </div>
                     </div>
-                    <span className={`text-lg font-extrabold ${card.color} leading-tight`}>{card.value}</span>
-                    <div className={`flex items-center gap-0.5 text-[9px] font-bold ${card.up ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      <span>{card.up ? '▲' : '▼'}</span>
-                      <span>{card.trend}</span>
+                    <div className="mt-2.5">
+                      <span className="text-lg font-black tracking-tight text-gray-900 dark:text-slate-100">{card.value}</span>
+                      <p className={`text-[9px] font-bold mt-1 ${card.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {card.trend}
+                      </p>
                     </div>
-                    {/* Mini sparkline */}
-                    <svg height="20" viewBox="0 0 60 20" className="w-full opacity-50">
-                      <polyline
-                        points={card.up
-                          ? `0,18 10,14 20,16 30,10 40,8 50,5 60,3`
-                          : `0,5 10,8 20,6 30,10 40,14 50,16 60,18`}
-                        fill="none"
-                        stroke={card.up ? '#10b981' : '#ef4444'}
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    {/* Sparkline curve */}
+                    <div className="h-7 mt-2 overflow-hidden opacity-60">
+                      <svg viewBox="0 0 100 30" className="w-full h-full">
+                        <path
+                          d={card.isPositive 
+                            ? "M0 25 C15 15, 30 18, 50 8 C70 2, 85 15, 100 5" 
+                            : "M0 5 C15 15, 30 10, 50 22 C70 28, 85 12, 100 25"
+                          }
+                          fill="none"
+                          stroke={card.isPositive ? "#10b981" : "#f43f5e"}
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* ── ROW 2: CHARTS ── */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-                {/* Lead Trend Overview */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-5">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Lead Trend Overview</h3>
-                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Week</option><option>This Month</option></select>
+              {/* Row 2: Lead Trend, Funnel, Source */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Lead Trend Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm lg:col-span-1.5 flex flex-col justify-between">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">Lead Trend Overview</h3>
+                    <select className="border border-gray-200 dark:border-slate-800 rounded-lg p-1.5 text-[10px] font-bold text-gray-600 bg-transparent focus:outline-none">
+                      <option>This Week</option>
+                      <option>This Month</option>
+                    </select>
                   </div>
-                  <div className="h-48">
+                  <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={[
-                        { date: 'Mon', Leads: 400, Converted: 240 },
-                        { date: 'Tue', Leads: 700, Converted: 350 },
-                        { date: 'Wed', Leads: 500, Converted: 280 },
-                        { date: 'Thu', Leads: 900, Converted: 430 },
-                        { date: 'Fri', Leads: 1000, Converted: 510 },
-                        { date: 'Sat', Leads: 750, Converted: 380 },
-                        { date: 'Sun', Leads: 600, Converted: 300 },
-                      ]} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                        { date: 'Mon', Leads: 380, Converted: 180 },
+                        { date: 'Tue', Leads: 620, Converted: 290 },
+                        { date: 'Wed', Leads: 490, Converted: 230 },
+                        { date: 'Thu', Leads: 550, Converted: 260 },
+                        { date: 'Fri', Leads: 720, Converted: 380 },
+                        { date: 'Sat', Leads: 910, Converted: 530 },
+                        { date: 'Sun', Leads: 640, Converted: 390 },
+                      ]}>
                         <defs>
-                          <linearGradient id="lgLeads" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#1a8a2a" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#1a8a2a" stopOpacity={0}/>
+                          <linearGradient id="colorL" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#1a6b2a" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#1a6b2a" stopOpacity={0}/>
                           </linearGradient>
-                          <linearGradient id="lgConv" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#86efac" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#86efac" stopOpacity={0}/>
+                          <linearGradient id="colorC" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#88c488" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#88c488" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.08}/>
-                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false}/>
-                        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false}/>
-                        <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }}/>
-                        <Legend wrapperStyle={{ fontSize: 10 }}/>
-                        <Area type="monotone" dataKey="Leads" stroke="#1a6b2a" fill="url(#lgLeads)" strokeWidth={2}/>
-                        <Area type="monotone" dataKey="Converted" stroke="#86efac" fill="url(#lgConv)" strokeWidth={2}/>
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.06} />
+                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={9} tickLine={false} />
+                        <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} />
+                        <Tooltip contentStyle={{ fontSize: 10, borderRadius: 8 }} />
+                        <Area type="monotone" name="Leads" dataKey="Leads" stroke="#1a6b2a" strokeWidth={2.5} fillOpacity={1} fill="url(#colorL)" />
+                        <Area type="monotone" name="Converted" dataKey="Converted" stroke="#88c488" strokeWidth={2} fillOpacity={1} fill="url(#colorC)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                {/* Lead Funnel */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
-                  <h3 className="font-bold text-sm mb-3">Lead Funnel</h3>
-                  <div className="space-y-2">
-                    {[
-                      { label: 'Total Leads', value: leads.length || 2458, pct: 100, color: '#1a4a2a' },
-                      { label: 'Contacted', value: Math.round((leads.length || 2458) * 0.58), pct: 58, color: '#2a6a3a' },
-                      { label: 'Interested', value: Math.round((leads.length || 2458) * 0.34), pct: 34, color: '#3a8a4a' },
-                      { label: 'Counselling', value: leads.filter(l=>l.pipelineStage==='Counselling').length || 520, pct: 21, color: '#4aaa5a' },
-                      { label: 'Admissions', value: leads.filter(l=>l.pipelineStage==='Confirmed').length || 320, pct: 13, color: '#5aca6a' },
-                      { label: 'Paid / Enrolled', value: Math.round((leads.filter(l=>l.pipelineStage==='Confirmed').length || 320) * 0.53), pct: 7, color: '#86efac' },
-                    ].map((row, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs">
-                        <div className="w-full relative">
-                          <div className="h-6 rounded flex items-center px-2 text-white text-[10px] font-bold" style={{ background: row.color, width: `${Math.max(row.pct, 12)}%`, minWidth: 60 }}>
-                            {row.value.toLocaleString()}
-                          </div>
+                {/* Lead Funnel Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-4">Lead Funnel</h3>
+                  <div className="flex flex-col items-center justify-center flex-1">
+                    <div className="w-full flex items-center justify-between gap-4">
+                      {/* Interactive CSS Funnel polygon */}
+                      <svg viewBox="0 0 160 120" className="w-32 h-auto opacity-95">
+                        <polygon points="10,5 150,5 135,22 25,22" fill="#155127" />
+                        <polygon points="26,24 134,24 122,41 38,41" fill="#1b6a33" />
+                        <polygon points="39,43 121,43 110,60 50,60" fill="#2d8745" />
+                        <polygon points="51,62 109,62 98,79 62,79" fill="#4fa767" />
+                        <polygon points="63,81 97,81 88,98 72,98" fill="#78c88e" />
+                        <polygon points="73,100 87,100 83,115 77,115" fill="#a4e4b7" />
+                      </svg>
+                      {/* Key Annotations */}
+                      <div className="flex-1 space-y-1.5 text-[9px] font-bold text-gray-600 dark:text-slate-400">
+                        <div className="flex justify-between border-b pb-0.5 border-gray-100 dark:border-slate-800">
+                          <span>2,458</span><span className="text-gray-400 font-semibold">Total Leads</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 whitespace-nowrap w-20">{row.label}</span>
+                        <div className="flex justify-between border-b pb-0.5 border-gray-100 dark:border-slate-800">
+                          <span>1,420</span><span className="text-gray-400 font-semibold">Contacted</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-0.5 border-gray-100 dark:border-slate-800">
+                          <span>845</span><span className="text-gray-400 font-semibold">Interested</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-0.5 border-gray-100 dark:border-slate-800">
+                          <span>520</span><span className="text-gray-400 font-semibold">Counselling</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-0.5 border-gray-100 dark:border-slate-800">
+                          <span>320</span><span className="text-gray-400 font-semibold">Admissions</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>170</span><span className="text-gray-400 font-semibold">Paid / Enrolled</span>
+                        </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Lead Source */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Lead Source</h3>
-                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Month</option></select>
+                {/* Lead Source Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">Lead Source</h3>
+                    <select className="border border-gray-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold text-gray-600 bg-transparent focus:outline-none">
+                      <option>This Month</option>
+                    </select>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-32 h-32 flex-shrink-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={[
+                  
+                  <div className="h-44 relative flex justify-center items-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
                             { name: 'WhatsApp', value: 40 },
                             { name: 'Website', value: 25 },
                             { name: 'Facebook', value: 15 },
                             { name: 'Referral', value: 10 },
                             { name: 'Other', value: 10 },
-                          ]} cx="50%" cy="50%" innerRadius={38} outerRadius={55} dataKey="value" paddingAngle={2}>
-                            {['#1a6b2a','#4ade80','#fbbf24','#818cf8','#94a3b8'].map((c,i) => <Cell key={i} fill={c}/>)}
-                          </Pie>
-                          <text x="50%" y="46%" textAnchor="middle" dominantBaseline="middle" className="text-xs" fill="#64748b" fontSize={9}>Total</text>
-                          <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" fill="#1e293b" fontSize={13} fontWeight="bold">{(leads.length||2458).toLocaleString()}</text>
-                        </PieChart>
-                      </ResponsiveContainer>
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={68}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          <Cell fill="#1a6b2a" />
+                          <Cell fill="#2d8745" />
+                          <Cell fill="#f59e0b" />
+                          <Cell fill="#6366f1" />
+                          <Cell fill="#3b82f6" />
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    
+                    {/* Donut Center Label */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-sans">
+                      <span className="text-base font-black text-gray-800 dark:text-slate-100">2,458</span>
+                      <span className="text-[8px] text-gray-400 font-bold uppercase tracking-wider leading-none mt-0.5">Total Leads</span>
                     </div>
-                    <div className="flex-1 space-y-1.5 text-xs">
+                  </div>
+
+                  {/* Legend Details */}
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] font-bold text-gray-600 dark:text-slate-400 mt-2">
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#1a6b2a]"></span>WhatsApp</span><span>40%</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#2d8745]"></span>Website</span><span>25%</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>Facebook</span><span>15%</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#6366f1]"></span>Referral</span><span>10%</span></div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Row 3: Recent Admissions, Today's Schedule, Live Activities */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Recent Admissions Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm lg:col-span-1.5 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-4">Recent Admissions</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[10px] font-bold text-gray-600 dark:text-slate-400">
+                        <thead>
+                          <tr className="border-b border-gray-100 dark:border-slate-800 pb-2 text-[9px] text-gray-400 uppercase">
+                            <th className="py-2">Student Name</th>
+                            <th className="py-2">College / University</th>
+                            <th className="py-2">Course</th>
+                            <th className="py-2">Amount</th>
+                            <th className="py-2">Counsellor</th>
+                            <th className="py-2">Date</th>
+                            <th className="py-2">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-850">
+                          {[
+                            { name: 'Aarav Kumar', college: 'Patliputra University', course: 'B.Ed', amount: '₹ 45,000', counsellor: 'Rohit Kumar', date: '14 Jun 2026', status: 'Confirmed' },
+                            { name: 'Sneha Kumari', college: 'Lalit Narayan Mithila University', course: 'MBA', amount: '₹ 78,000', counsellor: 'Neha Singh', date: '14 Jun 2026', status: 'Confirmed' },
+                            { name: 'Vikash Ranjan', college: 'Aryabhatta Knowledge University', course: 'B.Tech', amount: '₹ 1,25,000', counsellor: 'Pankaj Kumar', date: '13 Jun 2026', status: 'Pending' },
+                            { name: 'Muskan Priya', college: 'Veer Kunwar Singh University', course: 'B.Sc (Nursing)', amount: '₹ 65,000', counsellor: 'Neha Singh', date: '13 Jun 2026', status: 'Confirmed' },
+                            { name: 'Rohit Raj', college: 'Bhupendra Narayan Mandal University', course: 'B.Com', amount: '₹ 35,000', counsellor: 'Rohit Kumar', date: '12 Jun 2026', status: 'Pending' },
+                          ].map((row, i) => (
+                            <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                              <td className="py-2 text-gray-800 dark:text-slate-200">{row.name}</td>
+                              <td className="py-2">{row.college}</td>
+                              <td className="py-2">{row.course}</td>
+                              <td className="py-2 text-gray-850 dark:text-slate-200">{row.amount}</td>
+                              <td className="py-2">{row.counsellor}</td>
+                              <td className="py-2">{row.date}</td>
+                              <td className="py-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold ${
+                                  row.status === 'Confirmed' 
+                                    ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' 
+                                    : 'bg-amber-50 text-amber-600 dark:bg-amber-950/20'
+                                }`}>
+                                  {row.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <button onClick={() => setActiveTab('students')} className="text-center text-[10px] font-extrabold text-[#1a6b2a] hover:underline mt-4 flex items-center justify-center gap-1.5">
+                    View all admissions ➔
+                  </button>
+                </div>
+
+                {/* Today's Schedule Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-4">Today's Schedule</h3>
+                    <div className="space-y-3.5">
                       {[
-                        { label: 'WhatsApp', pct: 40, color: '#1a6b2a' },
-                        { label: 'Website', pct: 25, color: '#4ade80' },
-                        { label: 'Facebook', pct: 15, color: '#fbbf24' },
-                        { label: 'Referral', pct: 10, color: '#818cf8' },
-                        { label: 'Other', pct: 10, color: '#94a3b8' },
-                      ].map((s,i) => (
-                        <div key={i} className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }}></span>
-                            <span className="text-slate-600 dark:text-slate-400">{s.label}</span>
+                        { time: '10:00 AM', desc: 'Follow up call', target: 'Student: Aarav Kumar', type: 'call' },
+                        { time: '11:30 AM', desc: 'Counselling Session', target: 'Student: Sneha Kumari', type: 'session' },
+                        { time: '02:00 PM', desc: 'University Meeting', target: 'LNMU Collaboration', type: 'meeting' },
+                        { time: '04:00 PM', desc: 'Follow up call', target: 'Student: Vikash Ranjan', type: 'call' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-center text-[10px] font-bold text-gray-700 dark:text-slate-300">
+                          <div>
+                            <span className="text-gray-400 block text-[9px]">{item.time}</span>
+                            <span className="text-gray-800 dark:text-slate-200 block">{item.desc}</span>
+                            <span className="text-[9px] text-gray-400 font-medium block mt-0.5">{item.target}</span>
                           </div>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">{s.pct}%</span>
+                          <button className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition">
+                            {item.type === 'call' && <Phone size={11} />}
+                            {item.type === 'session' && <UserPlus size={11} />}
+                            {item.type === 'meeting' && <School size={11} />}
+                          </button>
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* ── ROW 3: RECENT ADMISSIONS + SCHEDULE + LIVE ACTIVITIES ── */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-                {/* Recent Admissions Table */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Recent Admissions</h3>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-[11px]">
-                      <thead>
-                        <tr className="text-slate-400 border-b border-slate-100 dark:border-slate-800">
-                          {['Student Name','College / University','Course','Amount','Counsellor','Date','Status'].map(h => (
-                            <th key={h} className="text-left pb-2 font-semibold pr-2">{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="space-y-1">
-                        {[
-                          { name: 'Aarav Kumar', college: 'Patliputra University', course: 'B.Ed', amount: '₹45,000', counsellor: 'Rohit Kumar', date: '14 Jun 2026', status: 'Confirmed', color: 'A', bg: 'bg-blue-500' },
-                          { name: 'Sneha Kumari', college: 'Lalit Narayan Mithila University', course: 'MBA', amount: '₹78,000', counsellor: 'Neha Singh', date: '14 Jun 2026', status: 'Confirmed', color: 'S', bg: 'bg-emerald-500' },
-                          { name: 'Vikash Ranjan', college: 'Aryabhatta Knowledge University', course: 'B.Tech', amount: '₹1,25,000', counsellor: 'Pankaj Kumar', date: '13 Jun 2026', status: 'Pending', color: 'V', bg: 'bg-orange-400' },
-                          { name: 'Muskan Priya', college: 'Veer Kunwar Singh University', course: 'B.Sc (Nursing)', amount: '₹65,000', counsellor: 'Neha Singh', date: '13 Jun 2026', status: 'Confirmed', color: 'M', bg: 'bg-purple-500' },
-                          { name: 'Rohit Raj', college: 'Bhupendra Narayan Mandal University', course: 'B.Com', amount: '₹35,000', counsellor: 'Rohit Kumar', date: '12 Jun 2026', status: 'Pending', color: 'R', bg: 'bg-rose-400' },
-                          ...leads.filter(l => l.pipelineStage === 'Confirmed').slice(0,3).map(l => ({ name: l.name, college: l.preferredCollege || '—', course: l.preferredCourse || '—', amount: l.budget ? `₹${l.budget.toLocaleString('en-IN')}` : '—', counsellor: l.counsellor?.username || '—', date: new Date(l.updatedAt).toLocaleDateString('en-IN'), status: 'Confirmed', color: l.name[0], bg: 'bg-teal-500' }))
-                        ].slice(0,6).map((row, i) => (
-                          <tr key={i} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
-                            <td className="py-2 pr-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className={`w-6 h-6 rounded-full ${row.bg} text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0`}>{row.color}</span>
-                                <span className="font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{row.name}</span>
-                              </div>
-                            </td>
-                            <td className="py-2 pr-2 text-slate-500 max-w-[140px] truncate">{row.college}</td>
-                            <td className="py-2 pr-2 text-slate-500">{row.course}</td>
-                            <td className="py-2 pr-2 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{row.amount}</td>
-                            <td className="py-2 pr-2 text-slate-500 whitespace-nowrap">{row.counsellor}</td>
-                            <td className="py-2 pr-2 text-slate-400 whitespace-nowrap">{row.date}</td>
-                            <td className="py-2">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${ row.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }`}>{row.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
-                    View all admissions <span>→</span>
+                  <button onClick={() => alert('Calendar opening...')} className="text-center text-[10px] font-extrabold text-[#1a6b2a] hover:underline mt-4 flex items-center justify-center gap-1.5">
+                    View full calendar ➔
                   </button>
                 </div>
 
-                {/* Today's Schedule */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Today's Schedule</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {[
-                      { time: '10:00 AM', type: 'Follow up call', detail: 'Student: Aarav Kumar', icon: '📞', color: 'bg-blue-100 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/40' },
-                      { time: '11:30 AM', type: 'Counselling Session', detail: 'Student: Sneha Kumar', icon: '🧑‍💼', color: 'bg-emerald-100 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/40' },
-                      { time: '02:00 PM', type: 'University Meeting', detail: 'LNMU Collaboration', icon: '🏫', color: 'bg-purple-100 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800/40' },
-                      { time: '04:00 PM', type: 'Follow up call', detail: 'Student: Vikash Ranjan', icon: '📞', color: 'bg-orange-100 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800/40' },
-                    ].map((s, i) => (
-                      <div key={i} className={`flex gap-3 p-2.5 rounded-lg border ${s.color}`}>
-                        <div className="text-center">
-                          <div className="text-[9px] text-slate-400 font-semibold whitespace-nowrap">{s.time}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            <span>{s.icon}</span> {s.type}
+                {/* Live Activities Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-4">Live Activities</h3>
+                    <div className="space-y-3">
+                      {[
+                        { text: 'New lead received from website', details: 'by Rohit Kumar', time: '5 min ago', icon: <Globe size={11} className="text-emerald-600" /> },
+                        { text: 'Payment of ₹45,000 received', details: 'from Aarav Kumar', time: '15 min ago', icon: <DollarSign size={11} className="text-emerald-600" /> },
+                        { text: 'Admission confirmed for Sneha Kumari', details: 'B.Ed - Patliputra University by Neha Singh', time: '30 min ago', icon: <UserCheck size={11} className="text-emerald-600" /> },
+                        { text: 'Follow up scheduled with Vikash Ranjan', details: 'by Neha Singh', time: '45 min ago', icon: <Clock size={11} className="text-emerald-600" /> },
+                        { text: 'New counsellor Pankaj Kumar added', details: 'by Super Admin', time: '1 hour ago', icon: <UserPlus size={11} className="text-emerald-600" /> },
+                      ].map((activity, i) => (
+                        <div key={i} className="flex gap-2.5 items-start text-[10px] font-bold">
+                          <div className="w-6 h-6 rounded-full bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-center shrink-0 mt-0.5">
+                            {activity.icon}
                           </div>
-                          <div className="text-[9px] text-slate-500 mt-0.5">{s.detail}</div>
+                          <div className="flex-1">
+                            <span className="text-gray-800 dark:text-slate-200 block leading-tight">{activity.text}</span>
+                            <span className="text-[9px] text-gray-400 font-semibold block">{activity.details}</span>
+                          </div>
+                          <span className="text-[8px] text-gray-400 shrink-0 font-medium">{activity.time}</span>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
-                    View full calendar <span>→</span>
+                  <button onClick={() => setActiveTab('activity-logs')} className="text-center text-[10px] font-extrabold text-[#1a6b2a] hover:underline mt-4 flex items-center justify-center gap-1.5">
+                    View all activities ➔
                   </button>
                 </div>
 
-                {/* Live Activities */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Live Activities</h3>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  </div>
-                  <div className="space-y-3">
-                    {[
-                      { msg: 'New lead received from website', sub: 'by Rohit Kumar', time: '5 min ago', icon: '🟢', color: 'bg-emerald-50 dark:bg-emerald-950/20' },
-                      { msg: 'Payment of ₹45,000 received', sub: 'from Aarav Kumar', time: '15 min ago', icon: '💰', color: 'bg-amber-50 dark:bg-amber-950/20' },
-                      { msg: 'Admission confirmed for Sneha Kumari', sub: 'B.Ed – Patliputra University', time: '30 min ago', icon: '✅', color: 'bg-blue-50 dark:bg-blue-950/20' },
-                      { msg: 'Follow up scheduled with Vikash Ranjan', sub: 'by Neha Singh', time: '45 min ago', icon: '📅', color: 'bg-purple-50 dark:bg-purple-950/20' },
-                      { msg: 'New counsellor Pankaj Kumar added', sub: 'by Super Admin', time: '1 hour ago', icon: '👤', color: 'bg-slate-50 dark:bg-slate-800/40' },
-                    ].map((a, i) => (
-                      <div key={i} className={`flex gap-2.5 p-2 rounded-lg ${a.color}`}>
-                        <span className="text-sm flex-shrink-0 mt-0.5">{a.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 leading-tight">{a.msg}</p>
-                          <p className="text-[9px] text-slate-400 mt-0.5">{a.sub}</p>
-                        </div>
-                        <span className="text-[8px] text-slate-400 whitespace-nowrap flex-shrink-0">{a.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
-                    View all activities <span>→</span>
-                  </button>
-                </div>
               </div>
 
-              {/* ── ROW 4: REVENUE + TOP COUNSELLORS + ADMISSIONS BY COURSE + AI INSIGHTS ── */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-                {/* Revenue Overview */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Revenue Overview</h3>
-                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Year</option><option>This Month</option></select>
+              {/* Row 4: Revenue Overview, Top Counsellors, Course Admissions, AI Insights */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                
+                {/* Revenue Overview Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between lg:col-span-1">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">Revenue Overview</h3>
+                    <select className="border border-gray-200 dark:border-slate-800 rounded-lg p-1 text-[10px] font-bold text-gray-600 bg-transparent focus:outline-none">
+                      <option>This Year</option>
+                    </select>
                   </div>
-                  <div className="h-40">
+                  <div className="h-44">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={[
-                        { month: 'Jan', rev: 180000 },
-                        { month: 'Feb', rev: 220000 },
-                        { month: 'Mar', rev: 195000 },
-                        { month: 'Apr', rev: 280000 },
-                        { month: 'May', rev: 310000 },
-                        { month: 'Jun', rev: accountingStats?.summary?.totalIncome || 245860 },
-                      ]} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.08} vertical={false}/>
-                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={9} tickLine={false}/>
-                        <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} tickFormatter={v => `${(v/1000).toFixed(0)}k`}/>
-                        <Tooltip formatter={(v:any) => `₹${Number(v).toLocaleString('en-IN')}`} contentStyle={{ fontSize: 10, borderRadius: 8 }}/>
-                        <Bar dataKey="rev" fill="#1a6b2a" radius={[4,4,0,0]} />
+                        { month: 'Jan', revenue: 16 },
+                        { month: 'Feb', revenue: 22 },
+                        { month: 'Mar', revenue: 26 },
+                        { month: 'Apr', revenue: 20 },
+                        { month: 'May', revenue: 32 },
+                        { month: 'Jun', revenue: 38 },
+                      ]}>
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.05} />
+                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={8} tickLine={false} />
+                        <YAxis stroke="#94a3b8" fontSize={8} tickLine={false} label={{ value: 'Lakhs', angle: -90, position: 'insideLeft', fontSize: 8 }} />
+                        <Tooltip formatter={(value) => `${value}L`} />
+                        <Bar dataKey="revenue" fill="#1a6b2a" radius={[4, 4, 0, 0]} barSize={16} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                {/* Top Performing Counsellors */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Top Performing Counsellors</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Rohit Kumar', admissions: 152, revenue: '₹ 12,45,000', medal: '🥇', bg: 'bg-amber-100 dark:bg-amber-950/30' },
-                      { name: 'Neha Singh', admissions: 98, revenue: '₹ 8,25,000', medal: '🥈', bg: 'bg-slate-100 dark:bg-slate-800/40' },
-                      { name: 'Pankaj Kumar', admissions: 70, revenue: '₹ 5,45,000', medal: '🥉', bg: 'bg-orange-100 dark:bg-orange-950/20' },
-                    ].map((c, i) => (
-                      <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg ${c.bg}`}>
-                        <span className="text-xl">{c.medal}</span>
-                        <div className="w-8 h-8 rounded-full bg-[#1a6b2a]/20 flex items-center justify-center text-xs font-bold text-[#1a6b2a]">{c.name[0]}</div>
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{c.name}</p>
-                          <p className="text-[9px] text-slate-400">{c.admissions} Admissions</p>
+                {/* Top Performing Counsellors Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-4">Top Performing Counsellors</h3>
+                    <div className="space-y-3.5">
+                      {[
+                        { rank: 1, name: 'Rohit Kumar', count: '152 Admissions', amount: '₹ 12,45,000', badgeColor: 'bg-amber-500' },
+                        { rank: 2, name: 'Neha Singh', count: '98 Admissions', amount: '₹ 8,25,000', badgeColor: 'bg-slate-400' },
+                        { rank: 3, name: 'Pankaj Kumar', count: '70 Admissions', amount: '₹ 5,45,000', badgeColor: 'bg-amber-700' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-center text-[10px] font-bold text-gray-700 dark:text-slate-300">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-4 h-4 rounded-full ${item.badgeColor} text-white text-[8px] flex items-center justify-center shrink-0`}>
+                              {item.rank}
+                            </span>
+                            <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+                            </div>
+                            <div>
+                              <span className="text-gray-850 dark:text-slate-200 block">{item.name}</span>
+                              <span className="text-[8px] text-gray-400 font-semibold block">{item.count}</span>
+                            </div>
+                          </div>
+                          <span className="text-[#1a6b2a] font-extrabold">{item.amount}</span>
                         </div>
-                        <span className="text-xs font-extrabold text-[#1a6b2a]">{c.revenue}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                  <button className="mt-3 text-[11px] text-[#1a6b2a] font-semibold hover:underline flex items-center gap-1">
-                    View all counsellors <span>→</span>
+                  <button onClick={() => alert('Counsellor performance leaderboard opening...')} className="text-center text-[10px] font-extrabold text-[#1a6b2a] hover:underline mt-4 flex items-center justify-center gap-1.5">
+                    View all counsellors ➔
                   </button>
                 </div>
 
-                {/* Admissions by Course */}
-                <div className="glass-card rounded-xl p-4 border border-slate-200/40 dark:border-slate-800/30 lg:col-span-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-sm">Admissions by Course</h3>
-                    <select className="text-[10px] border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 bg-transparent text-slate-500"><option>This Month</option></select>
+                {/* Admissions by Course Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200">Admissions by Course</h3>
+                    <select className="border border-gray-200 dark:border-slate-800 rounded-lg p-1 text-[9px] font-bold text-gray-600 bg-transparent focus:outline-none">
+                      <option>This Month</option>
+                    </select>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-28 h-28 flex-shrink-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={[
+                  <div className="h-36 relative flex justify-center items-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
                             { name: 'B.Ed', value: 35 },
                             { name: 'MBA', value: 20 },
                             { name: 'B.Tech', value: 18 },
                             { name: 'B.Sc', value: 15 },
                             { name: 'Other', value: 12 },
-                          ]} cx="50%" cy="50%" innerRadius={32} outerRadius={50} dataKey="value" paddingAngle={2}>
-                            {['#1a6b2a','#4ade80','#fbbf24','#818cf8','#94a3b8'].map((c,i) => <Cell key={i} fill={c}/>)}
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="flex-1 space-y-1.5">
-                      {[
-                        { label: 'B.Ed', pct: 35, color: '#1a6b2a' },
-                        { label: 'MBA', pct: 20, color: '#4ade80' },
-                        { label: 'B.Tech', pct: 18, color: '#fbbf24' },
-                        { label: 'B.Sc', pct: 15, color: '#818cf8' },
-                        { label: 'Other', pct: 12, color: '#94a3b8' },
-                      ].map((s,i) => (
-                        <div key={i} className="flex items-center justify-between text-[10px]">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }}></span>
-                            <span className="text-slate-600 dark:text-slate-400">{s.label}</span>
-                          </div>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">{s.pct}%</span>
-                        </div>
-                      ))}
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={36}
+                          outerRadius={52}
+                          paddingAngle={3}
+                          dataKey="value"
+                        >
+                          <Cell fill="#1a6b2a" />
+                          <Cell fill="#2d8745" />
+                          <Cell fill="#3b82f6" />
+                          <Cell fill="#f59e0b" />
+                          <Cell fill="#6366f1" />
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Small Course Legend */}
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[8px] font-bold text-gray-500 dark:text-slate-400 mt-2">
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#1a6b2a]"></span>B.Ed</span><span>35%</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#2d8745]"></span>MBA</span><span>20%</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#3b82f6]"></span>B.Tech</span><span>18%</span></div>
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#f59e0b]"></span>B.Sc</span><span>15%</span></div>
+                  </div>
+                </div>
+
+                {/* AI Insights Card */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-gray-800 dark:text-slate-200 mb-4 flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-amber-500" /> AI Insights
+                    </h3>
+                    <div className="space-y-3.5 text-[9px] font-bold text-gray-700 dark:text-slate-300">
+                      <div className="flex gap-2">
+                        <span className="text-amber-500 shrink-0">✦</span>
+                        <p className="leading-relaxed">Admission conversion rate likely to increase by <span className="text-[#1a6b2a]">18%</span> in next 30 days.</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-amber-500 shrink-0">✦</span>
+                        <p className="leading-relaxed">B.Tech admissions are trending high in Bihar.</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-amber-500 shrink-0">✦</span>
+                        <p className="leading-relaxed">Follow up with <span className="text-[#1a6b2a]">56 leads</span> to convert into admission.</p>
+                      </div>
                     </div>
                   </div>
+                  <button onClick={() => setActiveTab('ai')} className="text-center text-[10px] font-extrabold text-[#1a6b2a] hover:underline mt-4 flex items-center justify-center gap-1.5">
+                    View all insights ➔
+                  </button>
                 </div>
 
               </div>
 
             </div>
           )}
-
           {/* FINANCE & REVENUE DASHBOARD — Director Finance Only */}
           {activeTab === 'dashboard-finance' && isDirectorFinance && (
             <div className="space-y-6">
