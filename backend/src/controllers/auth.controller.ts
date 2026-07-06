@@ -57,11 +57,15 @@ export async function login(req: AuthenticatedRequest, res: Response) {
       { expiresIn: '24h' }
     );
 
-    // If student, get their profile details too
+    // If student, get their profile details and lead record too
     let studentProfile = null;
+    let lead = null;
     if (user.role === 'STUDENT') {
       studentProfile = await prisma.studentProfile.findUnique({
         where: { userId: user.id },
+      });
+      lead = await prisma.lead.findFirst({
+        where: { email: user.email, tenantId: user.tenantId },
       });
     }
 
@@ -74,6 +78,7 @@ export async function login(req: AuthenticatedRequest, res: Response) {
         role: user.role,
         tenantId: user.tenantId,
         studentProfile,
+        lead,
       },
       tenant: {
         id: tenant.id,
@@ -200,7 +205,28 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    return res.status(200).json({ user });
+    let lead = null;
+    if (user.role === 'STUDENT') {
+      lead = await prisma.lead.findFirst({
+        where: { email: user.email, tenantId: user.tenantId },
+      });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        tenantId: user.tenantId,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        studentProfile: user.studentProfile,
+        tenant: user.tenant,
+        lead,
+      }
+    });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }

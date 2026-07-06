@@ -19,6 +19,7 @@ interface User {
   username: string;
   role: string;
   phone?: string;
+  lead?: Lead;
 }
 
 interface Tenant {
@@ -456,6 +457,25 @@ export default function App() {
     }
   };
 
+  // Student Profile: Update own lead record from student portal
+  const updateStudentLead = async (leadId: string, updatedFields: any) => {
+    try {
+      const res = await fetch(`${API_URL}/api/crm/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(updatedFields)
+      });
+      if (res.ok) {
+        fetchProfile();
+      }
+    } catch (e) {
+      console.error('Error updating student lead:', e);
+    }
+  };
+
   // CRM: Create New Lead
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -631,6 +651,11 @@ export default function App() {
           [`${docField}Status`]: 'Approved',
           [`${docField}Url`]: 'https://example.com/uploaded-doc.pdf'
         }));
+      }
+
+      // Update lead docStatus to 'Under Review' in the database
+      if (currentUser?.lead) {
+        updateStudentLead(currentUser.lead.id, { docStatus: 'Under Review' });
       }
     }, 1500);
   };
@@ -1517,13 +1542,13 @@ export default function App() {
 
               {/* Summary Stats */}
               {(() => {
-                const enrolledStudents = leads.filter(l => l.pipelineStage === 'Confirmed').map((l) => ({
+                const enrolledStudents = leads.filter(l => ['Counselling', 'DocPending', 'Confirmed'].includes(l.pipelineStage)).map((l) => ({
                   id: l.id, name: l.name, email: l.email, phone: l.phone,
                   course: l.preferredCourse || 'N/A', college: l.preferredCollege || 'N/A',
                   counsellor: l.counsellor?.username || 'Aditi Sharma',
                   docStatus: l.docStatus || 'Pending',
                   feeStatus: l.feeStatus || 'Pending',
-                  stage: 'Enrolled',
+                  stage: l.pipelineStage === 'Confirmed' ? 'Enrolled' : l.pipelineStage === 'DocPending' ? 'Docs Pending' : 'Counselling',
                 }));
 
                 const total = enrolledStudents.length;
@@ -1674,14 +1699,42 @@ export default function App() {
               <div className="glass-card p-5 rounded-2xl border border-slate-200/40 dark:border-slate-800/30">
                 <h3 className="font-extrabold text-sm mb-4">Your Admission Journey</h3>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0">
-                  {[
-                    { label: 'Application\nSubmitted', done: true, active: false },
-                    { label: 'Counselling\nSession', done: true, active: false },
-                    { label: 'Documents\nVerified', done: true, active: false },
-                    { label: 'Offer Letter\nIssued', done: true, active: false },
-                    { label: 'Fee\nPayment', done: false, active: true },
-                    { label: 'Enrollment\nComplete', done: false, active: false },
-                  ].map((step, i, arr) => (
+                  {(() => {
+                    const lead = currentUser.lead;
+                    const stage = lead?.pipelineStage || 'New';
+                    const docStatus = lead?.docStatus || 'Pending';
+                    const feeStatus = lead?.feeStatus || 'Pending';
+
+                    const steps = [
+                      { label: 'Application\nSubmitted', done: true, active: false },
+                      { 
+                        label: 'Counselling\nSession', 
+                        done: stage !== 'New', 
+                        active: stage === 'New' 
+                      },
+                      { 
+                        label: 'Documents\nVerified', 
+                        done: docStatus === 'Verified' || stage === 'Confirmed', 
+                        active: (stage === 'Counselling' || stage === 'DocPending') && docStatus !== 'Verified' 
+                      },
+                      { 
+                        label: 'Offer Letter\nIssued', 
+                        done: stage === 'Confirmed', 
+                        active: stage === 'DocPending' && docStatus === 'Verified' 
+                      },
+                      { 
+                        label: 'Fee\nPayment', 
+                        done: feeStatus === 'Paid', 
+                        active: stage === 'Confirmed' && feeStatus !== 'Paid' 
+                      },
+                      { 
+                        label: 'Enrollment\nComplete', 
+                        done: stage === 'Confirmed' && feeStatus === 'Paid', 
+                        active: false 
+                      },
+                    ];
+
+                    return steps.map((step, i, arr) => (
                     <div key={step.label} className="flex flex-col sm:flex-row items-center flex-1">
                       <div className="flex flex-col items-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-xs border-2 ${step.done ? 'bg-emerald-500 border-emerald-500 text-white' : step.active ? 'bg-blue-600 border-blue-600 text-white animate-pulse' : 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-400'}`}>
@@ -1693,8 +1746,9 @@ export default function App() {
                         <div className={`hidden sm:block h-0.5 flex-1 mx-2 rounded-full ${step.done ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'}`} />
                       )}
                     </div>
-                  ))}
-                </div>
+                  ));
+                })()}
+              </div>
               </div>
 
               {/* Key Info Cards */}
@@ -1757,19 +1811,38 @@ export default function App() {
           {activeTab === 'student-documents' && isStudent && (
             <div className="space-y-5">
               <div className="glass-card p-5 rounded-2xl border border-slate-200/40 dark:border-slate-800/30">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-extrabold text-sm">Document Submission & Verification</h3>
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">4/6 Verified</span>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    { field: 'marksheet10', label: '10th Marksheet', status: 'Approved', required: true },
-                    { field: 'marksheet12', label: '12th Marksheet / Diploma', status: 'Approved', required: true },
-                    { field: 'aadhar', label: 'Aadhar Card', status: 'Approved', required: true },
-                    { field: 'passport', label: 'Passport Photo', status: 'Approved', required: true },
-                    { field: 'casteCert', label: 'Caste Certificate', status: 'Pending Upload', required: false },
-                    { field: 'migCert', label: 'Migration Certificate', status: 'Under Review', required: true },
-                  ].map(doc => {
+                {(() => {
+                  const lead = currentUser.lead;
+                  const docStatus = lead?.docStatus || 'Pending';
+                  
+                  // Map database docStatus to individual document statuses
+                  const getStatus = (req: boolean) => {
+                    if (docStatus === 'Verified') return 'Approved';
+                    if (docStatus === 'Under Review') return req ? 'Under Review' : 'Pending Upload';
+                    return req ? 'Pending Upload' : 'Pending Upload';
+                  };
+
+                  const docs = [
+                    { field: 'marksheet10', label: '10th Marksheet', status: getStatus(true), required: true },
+                    { field: 'marksheet12', label: '12th Marksheet / Diploma', status: getStatus(true), required: true },
+                    { field: 'aadhar', label: 'Aadhar Card', status: getStatus(true), required: true },
+                    { field: 'passport', label: 'Passport Photo', status: getStatus(true), required: true },
+                    { field: 'casteCert', label: 'Caste Certificate', status: getStatus(false), required: false },
+                    { field: 'migCert', label: 'Migration Certificate', status: getStatus(true), required: true },
+                  ];
+
+                  const verifiedCount = docs.filter(d => d.status === 'Approved').length;
+
+                  return (
+                    <>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-extrabold text-sm">Document Submission & Verification</h3>
+                        <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
+                          {verifiedCount}/6 Verified
+                        </span>
+                      </div>
+                      <div className="space-y-3">
+                        {docs.map(doc => {
                     const isApproved = doc.status === 'Approved';
                     const isReview = doc.status === 'Under Review';
                     const uploading = uploadProgress[doc.field] === 'Uploading';
@@ -1799,7 +1872,10 @@ export default function App() {
                       </div>
                     );
                   })}
-                </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           )}
