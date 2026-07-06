@@ -12,8 +12,10 @@ async function ensureStudentProfileForLead(lead: any) {
     });
 
     if (!user) {
-      // Create user account for student with default password
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      // Generate a secure random password for the student
+      const crypto = await import('crypto');
+      const rawPassword = crypto.randomBytes(8).toString('hex'); // 16-char random hex password
+      const hashedPassword = await bcrypt.hash(rawPassword, 10);
       user = await prisma.user.create({
         data: {
           tenantId: lead.tenantId,
@@ -23,7 +25,8 @@ async function ensureStudentProfileForLead(lead: any) {
           role: 'STUDENT',
         }
       });
-      console.log(`Auto-created student user account for lead: ${lead.email}`);
+      // Log password ONLY in server console (admin/DevOps can retrieve from logs and share with student)
+      console.log(`[STUDENT ACCOUNT CREATED] Email: ${lead.email} | Temporary Password: ${rawPassword} | Share via secure channel.`);
     }
 
     // 2. Check if student profile already exists
