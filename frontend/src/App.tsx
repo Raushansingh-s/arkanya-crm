@@ -251,6 +251,8 @@ export default function App() {
   const [loginPassword, setLoginPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   // AI Center States
   const [aiRecMarks, setAiRecMarks] = useState('85');
@@ -1176,86 +1178,252 @@ export default function App() {
   // Render Login state screen
   if (!authToken || !currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-900">
-        {/* Animated Background Orbs */}
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-[120px]"></div>
-
-        <div className="w-full max-w-md p-8 rounded-2xl border border-slate-800/80 bg-slate-950/80 backdrop-blur-xl shadow-2xl relative z-10">
-          <div className="flex flex-col items-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-blue-500/20 mb-4">
-              A
-            </div>
-            <h1 className="text-2xl font-bold text-white font-sans text-center">Arkanya Edutech ERP & CRM</h1>
-            <p className="text-slate-400 text-xs mt-1">Multi-Campus Admission SaaS Platform</p>
-          </div>
-
-          {loginError && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs p-3 rounded-lg flex items-center space-x-2 mb-4">
-              <XCircle size={16} />
-              <span>{loginError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Tenant Workspace Slug</label>
-              <div className="relative">
-                <Globe className="absolute left-3 top-3 text-slate-500" size={16} />
-                <input 
-                  type="text" 
-                  value={tenantSlugInput}
-                  onChange={(e) => setTenantSlugInput(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 text-slate-100 pl-10 pr-4 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none"
-                  placeholder="e.g. arkanya"
-                  required
-                />
+      <div className="min-h-screen flex flex-col" style={{background: 'linear-gradient(135deg, #f0faf0 0%, #e8f5e8 40%, #d4edda 100%)'}}>
+        {/* Main Content */}
+        <div className="flex flex-1 min-h-0">
+          {/* ── LEFT PANEL ── */}
+          <div className="hidden lg:flex flex-col flex-1 px-12 py-10 relative overflow-hidden">
+            {/* Logo */}
+            <div className="flex items-center gap-3 mb-10">
+              <div className="w-14 h-14 flex items-center justify-center">
+                <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="56" height="56">
+                  <polygon points="30,4 56,52 4,52" fill="#1a5c1a" opacity="0.12"/>
+                  <polygon points="30,10 52,50 8,50" fill="none" stroke="#1a6b2a" strokeWidth="2"/>
+                  <text x="22" y="46" fontSize="22" fontWeight="900" fill="#1a6b2a" fontFamily="sans-serif">A</text>
+                  <circle cx="30" cy="8" r="4" fill="#1a6b2a"/>
+                  <path d="M25 10 Q30 4 35 10" stroke="#1a6b2a" strokeWidth="1.5" fill="none"/>
+                </svg>
+              </div>
+              <div>
+                <div className="font-extrabold text-[#1a4a1a] text-lg leading-tight tracking-wide">ARKANYA</div>
+                <div className="text-[10px] text-[#2d7a2d] font-bold tracking-widest">— EDUTECH PVT. LTD. —</div>
+                <div className="text-[9px] text-[#4a8a4a] font-medium tracking-wide">Empowering Education Through Technology</div>
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
-              <input 
-                type="email" 
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 text-slate-100 px-4 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none"
-                placeholder="your@email.com"
-                required
-              />
+            {/* Tagline */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-extrabold text-[#1a3a1a] leading-snug">
+                Smart Solutions<br/>
+                for a <span className="text-[#1a8a2a]">Better Tomorrow</span>
+              </h1>
+              <p className="text-sm text-[#3a6a3a] mt-3 leading-relaxed max-w-xs">
+                We empower educational institutions and businesses with innovative technology and digital solutions.
+              </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Password</label>
-              <input 
-                type="password" 
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 text-slate-100 px-4 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none"
-                placeholder="••••••••"
-                required
-              />
+            {/* Services Grid */}
+            <div className="grid grid-cols-3 gap-4 max-w-sm mb-8">
+              {[
+                { icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="1.8"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="18" cy="8" r="2"/><path d="M21 21v-1a3 3 0 00-2-2.8"/></svg>), label: 'Admission Consultancy' },
+                { icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="12" cy="10" r="2"/></svg>), label: 'College ERP & Automation' },
+                { icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="1.8"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8"/><path d="M7 8h10M7 12h6"/></svg>), label: 'Website Development' },
+                { icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>), label: 'Software Solutions' },
+                { icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="1.8"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>), label: 'IT & Digital Services' },
+                { icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a6b2a" strokeWidth="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07A19.5 19.5 0 014.1 11.7 19.8 19.8 0 011.07 3.1 2 2 0 013.06 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>), label: '24/7 Support' },
+              ].map((svc, i) => (
+                <div key={i} className="flex flex-col items-center text-center gap-1.5">
+                  <div className="w-12 h-12 rounded-full bg-white/70 border border-[#b8ddb8] flex items-center justify-center shadow-sm">
+                    {svc.icon}
+                  </div>
+                  <span className="text-[10px] text-[#2a5a2a] font-semibold leading-tight">{svc.label}</span>
+                </div>
+              ))}
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-2.5 rounded-lg text-sm shadow-lg transition duration-200"
-            >
-              {isLoggingIn ? 'Verifying Credentials...' : 'Sign In'}
-            </button>
-          </form>
+            {/* College illustration + green wave */}
+            <div className="absolute bottom-0 left-0 right-0 h-44 overflow-hidden pointer-events-none">
+              <svg viewBox="0 0 800 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute bottom-0 w-full">
+                <path d="M0 100 Q200 40 400 90 Q600 140 800 70 L800 180 L0 180 Z" fill="#c8e6c8" opacity="0.6"/>
+                <path d="M0 125 Q200 70 400 115 Q600 155 800 105 L800 180 L0 180 Z" fill="#a8d5a8" opacity="0.55"/>
+                <path d="M0 145 Q200 100 400 135 Q600 165 800 130 L800 180 L0 180 Z" fill="#88c488" opacity="0.45"/>
+                {/* Building */}
+                <rect x="80" y="88" width="65" height="60" fill="#d0cfc8" rx="2"/>
+                <rect x="88" y="72" width="49" height="22" fill="#c0bfb8" rx="1"/>
+                <rect x="109" y="54" width="5" height="22" fill="#aaa"/>
+                <circle cx="111" cy="52" r="4" fill="#999"/>
+                <rect x="87" y="103" width="13" height="11" fill="#b8b7b0"/>
+                <rect x="104" y="103" width="13" height="11" fill="#b8b7b0"/>
+                <rect x="121" y="103" width="13" height="11" fill="#b8b7b0"/>
+                <rect x="87" y="118" width="13" height="10" fill="#b8b7b0"/>
+                <rect x="121" y="118" width="13" height="10" fill="#b8b7b0"/>
+                <rect x="102" y="120" width="20" height="28" fill="#aaa9a2" rx="1"/>
+                {/* Trees */}
+                <ellipse cx="58" cy="98" rx="13" ry="15" fill="#5a9a5a" opacity="0.75"/>
+                <rect x="56" y="108" width="4" height="12" fill="#7a6a5a" opacity="0.6"/>
+                <ellipse cx="162" cy="94" rx="11" ry="13" fill="#4a8a4a" opacity="0.75"/>
+                <rect x="160" y="103" width="4" height="10" fill="#7a6a5a" opacity="0.6"/>
+                <ellipse cx="178" cy="98" rx="10" ry="12" fill="#5a9a5a" opacity="0.65"/>
+              </svg>
+            </div>
+          </div>
 
+          {/* ── RIGHT PANEL ── */}
+          <div className="flex items-center justify-center w-full lg:w-auto lg:min-w-[460px] px-6 py-10">
+            <div className="w-full max-w-[400px] bg-white rounded-3xl shadow-2xl shadow-green-200/40 p-8 border border-green-100">
+              {/* Card Header */}
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-extrabold text-gray-900">Welcome Back!</h2>
+                <p className="text-sm text-gray-500 mt-1">Login to your account</p>
+                <div className="w-10 h-0.5 bg-[#1a8a2a] mx-auto mt-2.5 rounded-full"></div>
+              </div>
+
+              {/* Error Banner */}
+              {loginError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-xl flex items-center gap-2 mb-4">
+                  <XCircle size={14} />
+                  <span>{loginError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                {/* Workspace / Tenant Slug */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Workspace / Organisation</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <Globe size={15} />
+                    </span>
+                    <input
+                      type="text"
+                      value={tenantSlugInput}
+                      onChange={(e) => setTenantSlugInput(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#1a8a2a] focus:ring-1 focus:ring-[#1a8a2a]/20 bg-gray-50 placeholder-gray-400 transition"
+                      placeholder="e.g. arkanya"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Email / Username */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email / Username</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    </span>
+                    <input
+                      type="text"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#1a8a2a] focus:ring-1 focus:ring-[#1a8a2a]/20 bg-gray-50 placeholder-gray-400 transition"
+                      placeholder="Enter your email or username"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Password</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    </span>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl pl-9 pr-10 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-[#1a8a2a] focus:ring-1 focus:ring-[#1a8a2a]/20 bg-gray-50 placeholder-gray-400 transition"
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(p => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                    >
+                      <Eye size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember me + Forgot Password */}
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={e => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 accent-[#1a8a2a] rounded"
+                    />
+                    <span className="text-xs text-gray-600 font-medium">Remember me</span>
+                  </label>
+                  <button type="button" className="text-xs text-[#1a6b2a] font-semibold hover:underline">Forgot Password?</button>
+                </div>
+
+                {/* Login Button */}
+                <button
+                  type="submit"
+                  disabled={isLoggingIn}
+                  className="w-full flex items-center justify-center gap-2 bg-[#1a6b2a] hover:bg-[#155522] active:bg-[#0f4019] text-white font-bold py-3 rounded-xl text-sm shadow-md shadow-green-700/20 transition-all duration-200 disabled:opacity-60"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  {isLoggingIn ? 'Verifying...' : 'Login'}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="text-xs text-gray-400 font-medium">or continue with</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+
+              {/* Social / SSO Buttons */}
+              <div className="grid grid-cols-3 gap-2">
+                <button type="button" className="flex items-center justify-center gap-1.5 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                  Google
+                </button>
+                <button type="button" className="flex items-center justify-center gap-1.5 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="13" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="13" width="10" height="10" fill="#00A4EF"/><rect x="13" y="13" width="10" height="10" fill="#FFB900"/></svg>
+                  Microsoft
+                </button>
+                <button type="button" className="flex items-center justify-center gap-1.5 border border-gray-200 rounded-xl py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition">
+                  <ShieldCheck size={13} className="text-blue-500" />
+                  SSO Login
+                </button>
+              </div>
+
+              {/* Contact Admin */}
+              <p className="text-center text-xs text-gray-500 mt-5">
+                New to Arkanya Edutech?{' '}
+                <button type="button" className="text-[#1a6b2a] font-bold hover:underline">Contact Admin</button>
+              </p>
+            </div>
+          </div>
         </div>
+
+        {/* ── FOOTER ── */}
+        <footer className="bg-[#0f2f0f] text-white">
+          <div className="max-w-screen-xl mx-auto flex items-center justify-between px-8 py-4 text-xs">
+            <div className="flex items-center gap-2 text-green-300/80">
+              <ShieldCheck size={14} />
+              <span>&copy; 2024 Arkanya Edutech Pvt. Ltd. All Rights Reserved.</span>
+            </div>
+            <div className="flex items-center gap-4 text-green-300/70">
+              <button type="button" className="hover:text-white transition">Privacy Policy</button>
+              <span className="text-green-700">|</span>
+              <button type="button" className="hover:text-white transition">Terms of Service</button>
+              <span className="text-green-700">|</span>
+              <div className="flex items-center gap-1">
+                <Globe size={12} />
+                <span>English</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
 
-  const role = currentUser.role;
 
   // ─────────────────────────────────────────────────
   // STRICT ROLE FLAGS
   // ─────────────────────────────────────────────────
+  const role = currentUser.role;
   const isSuperAdmin        = role === 'SUPERADMIN';
   const isDirectorAcademics = role === 'DIRECTOR_ACADEMICS';
   const isDirectorFinance   = role === 'DIRECTOR_FINANCE';
@@ -2143,8 +2311,9 @@ export default function App() {
                     { field: 'marksheet12', label: '12th Marksheet / Diploma', status: profile.doc12thStatus || 'Pending', url: profile.doc12thUrl, required: true },
                     { field: 'aadhar', label: 'Aadhar Card', status: profile.docAadharStatus || 'Pending', url: profile.docAadharUrl, required: true },
                     { field: 'passport', label: 'Passport Photo', status: profile.docPhotoStatus || 'Pending', url: profile.docPhotoUrl, required: true },
+                    { field: 'signature', label: 'Student Signature', status: profile.docSignatureStatus || 'Pending', url: profile.docSignatureUrl, required: true },
                     { field: 'casteCert', label: 'Caste Certificate', status: profile.docGradStatus || 'Pending', url: profile.docGradUrl, required: false },
-                    { field: 'migCert', label: 'Migration Certificate', status: profile.docSignatureStatus || 'Pending', url: profile.docSignatureUrl, required: true },
+                    { field: 'migCert', label: 'Migration Certificate', status: profile.docPANStatus || 'Pending', url: profile.docPANUrl, required: false },
                   ];
 
                   const verifiedCount = docs.filter(d => d.status === 'Approved').length;
@@ -2154,7 +2323,7 @@ export default function App() {
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-extrabold text-sm">Document Submission & Verification</h3>
                         <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
-                          {verifiedCount}/6 Verified
+                          {verifiedCount}/7 Verified
                         </span>
                       </div>
                       <div className="space-y-3">
@@ -4118,33 +4287,139 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Photo & Signature Preview */}
-                      <div className="grid grid-cols-2 gap-2 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl">
-                        <div className="flex flex-col items-center justify-center border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-1 bg-white dark:bg-slate-950 h-24">
-                          <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Photo</span>
-                          {selectedLead.studentProfile.docPhotoUrl ? (
-                            <img 
-                              src={`${API_URL}${selectedLead.studentProfile.docPhotoUrl}`} 
-                              alt="Student Photo" 
-                              className="max-h-16 w-auto object-contain rounded"
-                            />
-                          ) : (
-                            <span className="text-[8px] text-slate-500 text-center font-normal">No photo uploaded</span>
-                          )}
-                        </div>
-                        <div className="flex flex-col items-center justify-center border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-1 bg-white dark:bg-slate-950 h-24">
-                          <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Signature</span>
-                          {selectedLead.studentProfile.docSignatureUrl ? (
-                            <img 
-                              src={`${API_URL}${selectedLead.studentProfile.docSignatureUrl}`} 
-                              alt="Student Signature" 
-                              className="max-h-16 w-auto object-contain"
-                            />
-                          ) : (
-                            <span className="text-[8px] text-slate-500 text-center font-normal">No signature uploaded</span>
-                          )}
-                        </div>
-                      </div>
+                      {/* Photo & Signature Preview - inside studentProfile section */}
+                      {(() => {
+                        const photoUploading = uploadProgress['passport'] === 'Uploading';
+                        const signatureUploading = uploadProgress['signature'] === 'Uploading';
+                        const photoUrl = selectedLead.studentProfile?.docPhotoUrl;
+                        const signatureUrl = selectedLead.studentProfile?.docSignatureUrl;
+                        return (
+                          <div className="grid grid-cols-2 gap-2 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl">
+                            <div className="flex flex-col items-center justify-between border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950 min-h-[120px]">
+                              <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Photo</span>
+                              {photoUrl ? (
+                                <img 
+                                  src={`${API_URL}${photoUrl}`} 
+                                  alt="Student Photo" 
+                                  className="max-h-14 w-auto object-contain rounded"
+                                />
+                              ) : (
+                                <span className="text-[8px] text-slate-500 text-center font-normal mb-2">No photo uploaded</span>
+                              )}
+                              <button
+                                type="button"
+                                disabled={photoUploading}
+                                onClick={() => handleRealDocumentUpload('passport', selectedLead.id)}
+                                className={`w-full py-1 rounded text-[9px] font-bold transition mt-1 ${
+                                  photoUploading 
+                                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' 
+                                    : 'bg-blue-600 hover:bg-blue-500 text-white'
+                                }`}
+                              >
+                                {photoUploading ? 'Uploading...' : 'Upload Photo'}
+                              </button>
+                            </div>
+                            <div className="flex flex-col items-center justify-between border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950 min-h-[120px]">
+                              <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Signature</span>
+                              {signatureUrl ? (
+                                <img 
+                                  src={`${API_URL}${signatureUrl}`} 
+                                  alt="Student Signature" 
+                                  className="max-h-14 w-auto object-contain"
+                                />
+                              ) : (
+                                <span className="text-[8px] text-slate-500 text-center font-normal mb-2">No signature uploaded</span>
+                              )}
+                              <button
+                                type="button"
+                                disabled={signatureUploading}
+                                onClick={() => handleRealDocumentUpload('signature', selectedLead.id)}
+                                className={`w-full py-1 rounded text-[9px] font-bold transition mt-1 ${
+                                  signatureUploading 
+                                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' 
+                                    : 'bg-blue-600 hover:bg-blue-500 text-white'
+                                }`}
+                              >
+                                {signatureUploading ? 'Uploading...' : 'Upload Signature'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Photo & Signature Upload ── Always visible for all leads ── */}
+                {!selectedLead.studentProfile && (
+                  <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-4">
+                    <h4 className="text-[10px] text-indigo-500 uppercase tracking-wider font-extrabold pb-3 flex items-center gap-1.5">
+                      <Upload size={11} /> Photo &amp; Signature
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Passport Photo */}
+                      {(() => {
+                        const photoUploading = uploadProgress['passport'] === 'Uploading';
+                        return (
+                          <div className="flex flex-col items-center gap-2 border border-dashed border-indigo-200 dark:border-indigo-900/60 rounded-xl p-3 bg-indigo-50/30 dark:bg-indigo-950/10 min-h-[140px] group hover:border-indigo-400 transition-all">
+                            <span className="text-[9px] text-indigo-500 uppercase font-extrabold tracking-wider flex items-center gap-1">
+                              <Eye size={9} /> Passport Photo
+                            </span>
+                            <div className="flex-1 flex items-center justify-center w-full">
+                              <div className="w-16 h-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-white dark:bg-slate-900 overflow-hidden">
+                                <span className="text-slate-300 dark:text-slate-700">
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              disabled={photoUploading}
+                              onClick={() => handleRealDocumentUpload('passport', selectedLead.id)}
+                              className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${
+                                photoUploading 
+                                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' 
+                                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm hover:shadow-indigo-300/30'
+                              }`}
+                            >
+                              <Upload size={10} />
+                              {photoUploading ? 'Uploading...' : 'Upload Photo'}
+                            </button>
+                            <span className="text-[8px] text-slate-400 text-center">JPG, PNG or PDF • Max 2MB</span>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Signature */}
+                      {(() => {
+                        const signatureUploading = uploadProgress['signature'] === 'Uploading';
+                        return (
+                          <div className="flex flex-col items-center gap-2 border border-dashed border-purple-200 dark:border-purple-900/60 rounded-xl p-3 bg-purple-50/30 dark:bg-purple-950/10 min-h-[140px] group hover:border-purple-400 transition-all">
+                            <span className="text-[9px] text-purple-500 uppercase font-extrabold tracking-wider flex items-center gap-1">
+                              <Edit3 size={9} /> Student Signature
+                            </span>
+                            <div className="flex-1 flex items-center justify-center w-full">
+                              <div className="w-full h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-white dark:bg-slate-900 overflow-hidden px-2">
+                                <span className="text-slate-300 dark:text-slate-700 italic font-serif text-base tracking-widest">Sign</span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              disabled={signatureUploading}
+                              onClick={() => handleRealDocumentUpload('signature', selectedLead.id)}
+                              className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${
+                                signatureUploading 
+                                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait' 
+                                  : 'bg-purple-600 hover:bg-purple-500 text-white shadow-sm hover:shadow-purple-300/30'
+                              }`}
+                            >
+                              <Upload size={10} />
+                              {signatureUploading ? 'Uploading...' : 'Upload Signature'}
+                            </button>
+                            <span className="text-[8px] text-slate-400 text-center">JPG, PNG or PDF • Max 2MB</span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
@@ -4227,8 +4502,9 @@ export default function App() {
                       { field: 'marksheet12', label: '12th Marksheet / Diploma', status: profile.doc12thStatus || 'Pending', url: profile.doc12thUrl, required: true },
                       { field: 'aadhar', label: 'Aadhar Card', status: profile.docAadharStatus || 'Pending', url: profile.docAadharUrl, required: true },
                       { field: 'passport', label: 'Passport Photo', status: profile.docPhotoStatus || 'Pending', url: profile.docPhotoUrl, required: true },
+                      { field: 'signature', label: 'Student Signature', status: profile.docSignatureStatus || 'Pending', url: profile.docSignatureUrl, required: true },
                       { field: 'casteCert', label: 'Caste Certificate', status: profile.docGradStatus || 'Pending', url: profile.docGradUrl, required: false },
-                      { field: 'migCert', label: 'Migration Certificate', status: profile.docSignatureStatus || 'Pending', url: profile.docSignatureUrl, required: true },
+                      { field: 'migCert', label: 'Migration Certificate', status: profile.docPANStatus || 'Pending', url: profile.docPANUrl, required: false },
                     ];
 
                     return docs.map(doc => {

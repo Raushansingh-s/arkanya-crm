@@ -440,8 +440,9 @@ export async function uploadDocument(req: AuthenticatedRequest, res: Response) {
       marksheet12: { urlField: 'doc12thUrl', statusField: 'doc12thStatus' },
       aadhar: { urlField: 'docAadharUrl', statusField: 'docAadharStatus' },
       passport: { urlField: 'docPhotoUrl', statusField: 'docPhotoStatus' },
+      signature: { urlField: 'docSignatureUrl', statusField: 'docSignatureStatus' },
       casteCert: { urlField: 'docGradUrl', statusField: 'docGradStatus' },
-      migCert: { urlField: 'docSignatureUrl', statusField: 'docSignatureStatus' },
+      migCert: { urlField: 'docPANUrl', statusField: 'docPANStatus' },
     };
 
     const mapped = fieldMap[fieldName];
