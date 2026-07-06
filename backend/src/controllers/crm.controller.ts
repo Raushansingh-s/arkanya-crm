@@ -1,6 +1,61 @@
 import { Response } from 'express';
 import prisma from '../utils/db';
 import { AuthenticatedRequest } from '../middleware/auth';
+import bcrypt from 'bcryptjs';
+
+// Helper to auto-create User (role: STUDENT) and StudentProfile when a Lead is confirmed
+async function ensureStudentProfileForLead(lead: any) {
+  try {
+    // 1. Check if user already exists
+    let user = await prisma.user.findFirst({
+      where: { email: lead.email, tenantId: lead.tenantId }
+    });
+
+    if (!user) {
+      // Create user account for student with default password
+      const hashedPassword = await bcrypt.hash('password123', 10);
+      user = await prisma.user.create({
+        data: {
+          tenantId: lead.tenantId,
+          email: lead.email,
+          username: lead.name,
+          passwordHash: hashedPassword,
+          role: 'STUDENT',
+        }
+      });
+      console.log(`Auto-created student user account for lead: ${lead.email}`);
+    }
+
+    // 2. Check if student profile already exists
+    let studentProfile = await prisma.studentProfile.findUnique({
+      where: { userId: user.id }
+    });
+
+    if (!studentProfile) {
+      studentProfile = await prisma.studentProfile.create({
+        data: {
+          userId: user.id,
+          parentName: lead.parentName || '',
+          preferredCourse: lead.preferredCourse || '',
+          preferredCollege: lead.preferredCollege || '',
+          budgetLimit: lead.budget || 0,
+          doc10thStatus: lead.docStatus || 'Pending',
+          doc12thStatus: lead.docStatus || 'Pending',
+          docGradStatus: 'Pending',
+          docAadharStatus: lead.docStatus || 'Pending',
+          docPANStatus: 'Pending',
+          docPhotoStatus: 'Pending',
+          docSignatureStatus: 'Pending',
+        }
+      });
+      console.log(`Auto-created student profile for user ID: ${user.id}`);
+    }
+  } catch (err) {
+    console.error('Error in ensureStudentProfileForLead:', err);
+  }
+}
+
+
 
 export async function getLeads(req: AuthenticatedRequest, res: Response) {
   try {
@@ -93,6 +148,10 @@ export async function updateLeadStage(req: AuthenticatedRequest, res: Response) 
       data: { pipelineStage: stage }
     });
 
+    if (stage === 'Confirmed') {
+      await ensureStudentProfileForLead(lead);
+    }
+
     // Audit log
     await prisma.auditLog.create({
       data: {
@@ -134,6 +193,10 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
         leadScore: updateData.leadScore ? parseInt(updateData.leadScore) : undefined,
       }
     });
+
+    if (lead.pipelineStage === 'Confirmed') {
+      await ensureStudentProfileForLead(lead);
+    }
 
     return res.status(200).json(lead);
   } catch (error: any) {
