@@ -286,6 +286,8 @@ export default function App() {
   // Student specific uploads
   const [uploadProgress, setUploadProgress] = useState<Record<string, string>>({});
   const [studentProfileData, setStudentProfileData] = useState<any>(null);
+  const [studentPortalPassword, setStudentPortalPassword] = useState('');
+  const [isResettingStudentPassword, setIsResettingStudentPassword] = useState(false);
 
   // Setup theme on load
   useEffect(() => {
@@ -442,6 +444,40 @@ export default function App() {
       }
     } catch (e) {
       console.error('Error updating lead details:', e);
+    }
+  };
+
+  // CRM: Set / Reset Student Portal Password
+  const handleResetStudentPassword = async (leadId: string, passwordVal: string) => {
+    if (!passwordVal.trim()) {
+      alert('Please enter a password first.');
+      return;
+    }
+    setIsResettingStudentPassword(true);
+    try {
+      const res = await fetch(`${API_URL}/api/crm/student/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          leadId,
+          newPassword: passwordVal
+        })
+      });
+      if (res.ok) {
+        alert('Student portal password set successfully!');
+        setStudentPortalPassword('');
+      } else {
+        const err = await res.json();
+        alert(`Error resetting password: ${err.error}`);
+      }
+    } catch (e) {
+      console.error('Error resetting student password:', e);
+      alert('Failed to reset student password.');
+    } finally {
+      setIsResettingStudentPassword(false);
     }
   };
 
@@ -3954,14 +3990,42 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs space-y-1.5 mt-3">
-                  <span className="font-extrabold text-blue-500 uppercase block tracking-wider text-[10px]">Student Portal Access</span>
-                  <p className="text-slate-600 dark:text-slate-400">The student can log in to the Student Portal using their registered email. Share the login credentials privately via WhatsApp or Email.</p>
-                  <div className="space-y-1 font-mono text-[11px] bg-slate-900 text-white p-2.5 rounded-lg">
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs space-y-2 mt-3">
+                  <span className="font-extrabold text-blue-500 uppercase block tracking-wider text-[10px]">Student Portal Access & Password</span>
+                  <p className="text-slate-600 dark:text-slate-400">The student can log in to the Student Portal using their registered email. Share or set their password below:</p>
+                  
+                  <div className="space-y-1 font-mono text-[11px] bg-slate-900 text-white p-2.5 rounded-lg mb-2">
                     <div><strong>Portal URL:</strong> {window.location.origin}</div>
                     <div><strong>Workspace:</strong> {currentTenant?.slug || 'arkanya'}</div>
                     <div><strong>Login Email:</strong> {selectedLead.email}</div>
-                    <div className="text-amber-400"><strong>Note:</strong> Share password with student privately after account creation.</div>
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="text"
+                      value={studentPortalPassword}
+                      onChange={e => setStudentPortalPassword(e.target.value)}
+                      placeholder="Set login password for student"
+                      className="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded text-xs focus:outline-none text-slate-800 dark:text-slate-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const generated = Math.random().toString(36).slice(-8);
+                        setStudentPortalPassword(generated);
+                      }}
+                      className="px-2.5 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-bold rounded transition"
+                    >
+                      Generate
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isResettingStudentPassword}
+                      onClick={() => handleResetStudentPassword(selectedLead.id, studentPortalPassword)}
+                      className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded transition"
+                    >
+                      {isResettingStudentPassword ? 'Saving...' : 'Set Password'}
+                    </button>
                   </div>
                 </div>
 

@@ -35,6 +35,7 @@ router.patch('/crm/leads/:id', authenticateJWT, crmController.updateLead);
 router.post('/crm/leads/followup', authenticateJWT, crmController.addFollowUp);
 router.patch('/crm/leads/followup/:id/complete', authenticateJWT, crmController.completeFollowUp);
 router.get('/crm/stats', authenticateJWT, crmController.getCounsellorStats);
+router.post('/crm/student/reset-password', authenticateJWT, crmController.resetStudentPassword);
 
 // ==========================================
 // ERP CORE MANAGEMENT (COLLEGES, UNIVERSITIES, COURSES)

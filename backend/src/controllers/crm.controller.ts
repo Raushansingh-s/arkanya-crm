@@ -281,3 +281,41 @@ export async function getCounsellorStats(req: AuthenticatedRequest, res: Respons
     return res.status(500).json({ error: error.message });
   }
 }
+
+export async function resetStudentPassword(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { leadId, newPassword } = req.body;
+    if (!leadId || !newPassword) {
+      return res.status(400).json({ error: 'leadId and newPassword are required' });
+    }
+
+    const requesterRole = req.user?.role;
+    if (!['SUPERADMIN', 'ADMIN', 'COUNSELLOR', 'MARKETING_DIRECTOR', 'FINANCE_DIRECTOR'].includes(requesterRole || '')) {
+      return res.status(403).json({ error: 'Forbidden: You do not have permission to reset student passwords.' });
+    }
+
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    const studentUser = await prisma.user.findFirst({
+      where: { email: lead.email, tenantId: lead.tenantId }
+    });
+
+    if (!studentUser) {
+      return res.status(404).json({ error: 'No student user account exists for this lead.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: studentUser.id },
+      data: { passwordHash: hashedPassword }
+    });
+
+    return res.status(200).json({ message: 'Student password updated successfully.' });
+  } catch (error: any) {
+    console.error('Error resetting student password:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
