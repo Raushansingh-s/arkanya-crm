@@ -432,7 +432,7 @@ export default function App() {
   // CRM: Update Lead Stage
   const moveLeadStage = async (leadId: string, newStage: string) => {
     try {
-      const res = await fetch(`/api/crm/leads/${leadId}/stage`, {
+      const res = await fetch(`${API_URL}/api/crm/leads/${leadId}/stage`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -453,7 +453,7 @@ export default function App() {
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/crm/leads/create', {
+      const res = await fetch(`${API_URL}/api/crm/leads/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -484,7 +484,7 @@ export default function App() {
   // ERP: Booking Seat Trigger
   const handleBookSeat = async (courseId: string) => {
     try {
-      const res = await fetch('/api/erp/book-seat', {
+      const res = await fetch(`${API_URL}/api/erp/book-seat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -505,7 +505,7 @@ export default function App() {
   const triggerAiRecommendations = async () => {
     setIsAiLoading(true);
     try {
-      const res = await fetch('/api/ai/recommendations', {
+      const res = await fetch(`${API_URL}/api/ai/recommendations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -531,7 +531,7 @@ export default function App() {
   const triggerAiChancePredictor = async () => {
     if (!aiChanceCourse) return;
     try {
-      const res = await fetch('/api/ai/predict-chance', {
+      const res = await fetch(`${API_URL}/api/ai/predict-chance`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -554,7 +554,7 @@ export default function App() {
   const triggerOcrVerification = async () => {
     ocrLoading || setOcrLoading(true);
     try {
-      const res = await fetch('/api/ai/verify-doc', {
+      const res = await fetch(`${API_URL}/api/ai/verify-doc`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -586,7 +586,7 @@ export default function App() {
     setChatLoading(true);
 
     try {
-      const res = await fetch('/api/ai/chat', {
+      const res = await fetch(`${API_URL}/api/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2540,7 +2540,7 @@ export default function App() {
                             setIsSavingCollege(true);
                             setCollegeSaveMsg('');
                             try {
-                              const res = await fetch('/api/erp/colleges/create', {
+                              const res = await fetch(`${API_URL}/api/erp/colleges/create`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
                                 body: JSON.stringify({
@@ -2660,7 +2660,7 @@ export default function App() {
                             return;
                           }
                           try {
-                            const res = await fetch('/api/erp/courses/create', {
+                            const res = await fetch(`${API_URL}/api/erp/courses/create`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
                               body: JSON.stringify({ ...courseForm, collegeId: selectedCollege.id }),
@@ -2669,7 +2669,7 @@ export default function App() {
                               setShowAddCourseModal(false);
                               await fetchMasterData();
                               // refresh selected college
-                              const updated = await fetch('/api/erp/colleges', { headers: { Authorization: `Bearer ${authToken}` } });
+                              const updated = await fetch(`${API_URL}/api/erp/colleges`, { headers: { Authorization: `Bearer ${authToken}` } });
                               if (updated.ok) {
                                 const allColleges = await updated.json();
                                 setColleges(allColleges);
