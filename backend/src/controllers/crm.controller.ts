@@ -162,7 +162,7 @@ export async function updateLeadStage(req: AuthenticatedRequest, res: Response) 
       data: { pipelineStage: stage }
     });
 
-    if (stage === 'Confirmed') {
+    if (['Counselling', 'DocPending', 'Confirmed', 'Applied'].includes(stage)) {
       await ensureStudentProfileForLead(lead);
     }
 
@@ -209,7 +209,7 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
       }
     });
 
-    if (lead.pipelineStage === 'Confirmed') {
+    if (['Counselling', 'DocPending', 'Confirmed', 'Applied'].includes(lead.pipelineStage)) {
       await ensureStudentProfileForLead(lead);
     }
 
