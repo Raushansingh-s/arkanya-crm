@@ -66,6 +66,7 @@ model StudentProfile {
   preferredCourse     String?
   preferredCollege    String?
   budgetLimit         Float?
+  address             String?
   walletBalance       Float    @default(0.0)
   
   // Verification statuses of uploaded documents
@@ -200,6 +201,7 @@ model Lead {
   creatorId           String?   @db.ObjectId
   docStatus           String    @default("Pending") // Pending, Under Review, Verified
   feeStatus           String    @default("Pending") // Paid, Pending
+  address             String?
   droppedReason       String?
   notes               String?
   createdAt           DateTime  @default(now())

@@ -39,6 +39,7 @@ async function ensureStudentProfileForLead(lead: any) {
         data: {
           userId: user.id,
           parentName: lead.parentName || '',
+          address: lead.address || '',
           preferredCourse: lead.preferredCourse || '',
           preferredCollege: lead.preferredCollege || '',
           budgetLimit: lead.budget || 0,
@@ -211,6 +212,31 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
 
     if (['Counselling', 'DocPending', 'Confirmed', 'Applied'].includes(lead.pipelineStage)) {
       await ensureStudentProfileForLead(lead);
+    }
+
+    if (studentProfile) {
+      const user = await prisma.user.findFirst({
+        where: { email: lead.email, tenantId: lead.tenantId }
+      });
+      if (user) {
+        const { id: spId, userId: spUserId, user: spUser, walletBalance: _, ...profileUpdate } = studentProfile;
+        await prisma.studentProfile.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            ...profileUpdate,
+            address: profileUpdate.address || lead.address || '',
+            parentPhone: profileUpdate.parentPhone || '',
+            preferredCourse: lead.preferredCourse || '',
+            preferredCollege: lead.preferredCollege || '',
+          },
+          update: {
+            ...profileUpdate,
+            address: profileUpdate.address || lead.address || '',
+            parentPhone: profileUpdate.parentPhone || '',
+          }
+        });
+      }
     }
 
     return res.status(200).json(lead);

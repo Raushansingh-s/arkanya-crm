@@ -57,6 +57,7 @@ interface Lead {
   counsellor?: { username: string };
   followups?: FollowUp[];
   studentProfile?: any;
+  address?: string;
 }
 
 interface FollowUp {
@@ -848,30 +849,277 @@ export default function App() {
   // Download Student Application Form as PDF for confirmed admissions
   const handleDownloadApplicationForm = (lead: any) => {
     const appId = `ARK-APP-${lead.id?.slice(-6).toUpperCase() || 'XXXXXX'}`;
-    downloadAsPDF(
-      "STUDENT APPLICATION FORM — ARKANYA EDUTECH PVT. LTD.",
-      `Application_Form_${lead.name?.replace(/\s+/g, '_') || 'Student'}_${appId}.pdf`,
-      [
-        { label: "Application ID",        value: appId },
-        { label: "Student Full Name",      value: lead.name || '—' },
-        { label: "Phone Number",           value: lead.phone || '—' },
-        { label: "Email Address",          value: lead.email || '—' },
-        { label: "Parent / Guardian Name", value: lead.parentName || '—' },
-        { label: "State",                  value: lead.state || '—' },
-        { label: "City / District",        value: lead.city || '—' },
-        { label: "Prior Qualification",    value: lead.qualification || '—' },
-        { label: "Marks %",               value: lead.marksPercentage ? `${lead.marksPercentage}%` : '—' },
-        { label: "Preferred Course",       value: lead.preferredCourse || '—' },
-        { label: "Preferred College",      value: lead.preferredCollege || '—' },
-        { label: "Budget Range",           value: lead.budget ? `₹${Number(lead.budget).toLocaleString('en-IN')}` : '—' },
-        { label: "Lead Source",            value: lead.source || '—' },
-        { label: "Document Status",        value: lead.docStatus || 'Pending' },
-        { label: "Fee Status",             value: lead.feeStatus || 'Pending' },
-        { label: "Admission Stage",        value: lead.pipelineStage || '—' },
-        { label: "Application Date",       value: new Date(lead.createdAt).toLocaleDateString() },
-        { label: "Generated On",           value: new Date().toLocaleString() },
-      ]
-    );
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const profile = lead.studentProfile || {};
+    const photoUrl = profile.docPhotoUrl ? `${API_URL}${profile.docPhotoUrl}` : '';
+    const signatureUrl = profile.docSignatureUrl ? `${API_URL}${profile.docSignatureUrl}` : '';
+
+    const htmlContent = `
+      <html>
+      <head>
+        <title>Student Application Form - ${lead.name}</title>
+        <style>
+          @media print {
+            body { padding: 0; margin: 0; }
+            .no-print { display: none; }
+          }
+          body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #1e293b;
+            padding: 30px;
+            background-color: #ffffff;
+            line-height: 1.5;
+          }
+          .border-container {
+            border: 2px solid #1e3a8a;
+            padding: 24px;
+            border-radius: 8px;
+            position: relative;
+          }
+          .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            border-bottom: 3px double #1e3a8a;
+            padding-bottom: 15px;
+          }
+          .header-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e3a8a;
+            letter-spacing: -0.5px;
+          }
+          .header-subtitle {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+          }
+          .header-meta {
+            text-align: right;
+            font-size: 11px;
+            color: #475569;
+          }
+          .section-title {
+            background-color: #f1f5f9;
+            border-left: 4px solid #1e3a8a;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #1e3a8a;
+            text-transform: uppercase;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+          }
+          .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+          }
+          .info-table td {
+            padding: 8px 10px;
+            font-size: 12px;
+            border: 1px solid #e2e8f0;
+          }
+          .info-table td.label {
+            font-weight: 700;
+            color: #475569;
+            background-color: #f8fafc;
+            width: 25%;
+          }
+          .info-table td.value {
+            color: #0f172a;
+            width: 25%;
+          }
+          .photo-box {
+            border: 2px dashed #cbd5e1;
+            width: 110px;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #94a3b8;
+            text-align: center;
+            background-color: #f8fafc;
+            border-radius: 4px;
+            overflow: hidden;
+          }
+          .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .declaration {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 25px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+            text-align: justify;
+          }
+          .signature-section {
+            margin-top: 40px;
+            width: 100%;
+          }
+          .signature-box {
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #475569;
+          }
+          .signature-line {
+            border-top: 1px solid #94a3b8;
+            width: 150px;
+            margin: 10px auto 5px;
+          }
+          .signature-image {
+            max-height: 45px;
+            max-width: 150px;
+            object-fit: contain;
+            margin-bottom: 5px;
+          }
+          .stamp {
+            border: 3px double #10b981;
+            color: #10b981;
+            padding: 4px 12px;
+            font-weight: 800;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-size: 11px;
+            display: inline-block;
+            transform: rotate(-3deg);
+            margin-top: 15px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="border-container">
+          <table class="header-table">
+            <tr>
+              <td>
+                <div class="header-logo">ARKANYA EDUTECH PVT. LTD.</div>
+                <div class="header-subtitle">Official Student Admission Application</div>
+              </td>
+              <td class="header-meta">
+                <strong>Application ID:</strong> ${appId}<br/>
+                <strong>Date:</strong> ${new Date(lead.createdAt).toLocaleDateString()}<br/>
+                <strong>Workspace:</strong> ${currentTenant?.name || 'Arkanya'}
+              </td>
+            </tr>
+          </table>
+
+          <table style="width: 100%; margin-bottom: 20px;">
+            <tr>
+              <td style="vertical-align: top;">
+                <div class="section-title" style="margin-top: 0;">1. Personal & Contact Details</div>
+                <table class="info-table">
+                  <tr>
+                    <td class="label">Full Name</td>
+                    <td class="value" colspan="3"><strong>${lead.name}</strong></td>
+                  </tr>
+                  <tr>
+                    <td class="label">Email ID</td>
+                    <td class="value">${lead.email}</td>
+                    <td class="label">Phone No</td>
+                    <td class="value">${lead.phone}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Category</td>
+                    <td class="value">${profile.category || 'General'}</td>
+                    <td class="label">Address</td>
+                    <td class="value" colspan="2">${lead.address || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">City / District</td>
+                    <td class="value">${lead.city || '—'}</td>
+                    <td class="label">State</td>
+                    <td class="value">${lead.state || '—'}</td>
+                  </tr>
+                </table>
+              </td>
+              <td style="width: 130px; vertical-align: top; padding-left: 20px; align-items: center;">
+                <div class="photo-box">
+                  ${photoUrl ? `<img src="${photoUrl}" alt="Student Photo" />` : 'Affix Passport Size Photo Here'}
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="section-title">2. Guardian / Parent Information</div>
+          <table class="info-table">
+            <tr>
+              <td class="label">Father's Name</td>
+              <td class="value">${profile.parentName || lead.parentName || '—'}</td>
+              <td class="label">Father's Phone</td>
+              <td class="value">${profile.parentPhone || '—'}</td>
+            </tr>
+            <tr>
+              <td class="label">Aadhar Card No</td>
+              <td class="value">${profile.aadharNo || '—'}</td>
+              <td class="label">PAN Card No</td>
+              <td class="value">${profile.panNo || '—'}</td>
+            </tr>
+          </table>
+
+          <div class="section-title">3. Academic Details & Prior Qualification</div>
+          <table class="info-table">
+            <tr>
+              <td class="label">Highest Qualification</td>
+              <td class="value">${lead.qualification || '—'}</td>
+              <td class="label">Marks Percentage (%)</td>
+              <td class="value">${lead.marksPercentage ? `${lead.marksPercentage}%` : '—'}</td>
+            </tr>
+          </table>
+
+          <div class="section-title">4. Selection & Course Preference</div>
+          <table class="info-table">
+            <tr>
+              <td class="label">Selected College</td>
+              <td class="value" colspan="3"><strong>${lead.preferredCollege || '—'}</strong></td>
+            </tr>
+            <tr>
+              <td class="label">Interested Course</td>
+              <td class="value">${lead.preferredCourse || '—'}</td>
+              <td class="label">Budget Segment</td>
+              <td class="value">${lead.budget ? `₹${Number(lead.budget).toLocaleString('en-IN')}` : '—'}</td>
+            </tr>
+          </table>
+
+          <div class="declaration">
+            <strong>Declaration:</strong> I hereby declare that all the information provided in this admission form is true, correct, and complete to the best of my knowledge. I understand that any false statement or misrepresentation may lead to the rejection of my application or cancellation of admission.
+          </div>
+
+          <table class="signature-section">
+            <tr>
+              <td style="width: 50%; vertical-align: bottom;">
+                <div class="stamp">Verified ✓</div>
+              </td>
+              <td style="width: 50%; text-align: center; vertical-align: bottom;">
+                <div class="signature-box">
+                  ${signatureUrl ? `<img src="${signatureUrl}" class="signature-image" alt="Signature" /><br/>` : ''}
+                  <div class="signature-line"></div>
+                  Student Signature
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   // Render Pipeline Column
@@ -3617,6 +3865,7 @@ export default function App() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
                   {/* Column 1: Personal Details */}
+                  {/* Column 1: Personal Details */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Personal & Contact Info</h4>
                     <div>
@@ -3625,34 +3874,37 @@ export default function App() {
                         type="text" 
                         value={selectedLead.name} 
                         onChange={(e) => setSelectedLead({ ...selectedLead, name: e.target.value })}
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
                       />
                     </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
-                      <input 
-                        type="email" 
-                        value={selectedLead.email} 
-                        onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                      />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                        <input 
+                          type="email" 
+                          value={selectedLead.email} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
+                        <input 
+                          type="text" 
+                          value={selectedLead.phone} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
-                      <input 
-                        type="text" 
-                        value={selectedLead.phone} 
-                        onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Parent's Name</label>
-                      <input 
-                        type="text" 
-                        value={selectedLead.parentName || ''} 
-                        onChange={(e) => setSelectedLead({ ...selectedLead, parentName: e.target.value })}
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Address</label>
+                      <textarea 
+                        value={selectedLead.address || ''} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, address: e.target.value })}
+                        placeholder="House / Street, Area, LandMark"
+                        rows={2}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -3662,7 +3914,7 @@ export default function App() {
                           type="text" 
                           value={selectedLead.state || ''} 
                           onChange={(e) => setSelectedLead({ ...selectedLead, state: e.target.value })}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
                         />
                       </div>
                       <div>
@@ -3671,7 +3923,7 @@ export default function App() {
                           type="text" 
                           value={selectedLead.city || ''} 
                           onChange={(e) => setSelectedLead({ ...selectedLead, city: e.target.value })}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
                         />
                       </div>
                     </div>
@@ -3679,7 +3931,7 @@ export default function App() {
 
                   {/* Column 2: Academic & Workflow Details */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Counselling</h4>
+                    <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Onboarding</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
@@ -3688,18 +3940,18 @@ export default function App() {
                           onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
                           className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
                         >
-                          <option value="">-- Select Qualification --</option>
+                          <option value="">-- Select --</option>
                           <option value="10th Pass">10th Pass (Matric)</option>
                           <option value="12th Pass - Science">12th Pass – Science (PCM/PCB)</option>
                           <option value="12th Pass - Commerce">12th Pass – Commerce</option>
-                          <option value="12th Pass - Arts">12th Pass – Arts / Humanities</option>
+                          <option value="12th Pass - Arts">12th Pass – Arts</option>
                           <option value="Diploma">Diploma (3-year Polytechnic)</option>
                           <option value="Graduation">Graduation (Any Stream)</option>
                           <option value="B.Tech">B.Tech / B.E.</option>
                           <option value="B.Sc">B.Sc</option>
                           <option value="B.Com">B.Com</option>
                           <option value="B.A.">B.A.</option>
-                          <option value="Post Graduation">Post Graduation (M.Tech / MBA / M.Sc)</option>
+                          <option value="Post Graduation">Post Graduation</option>
                           <option value="Other">Other</option>
                         </select>
                       </div>
@@ -3710,40 +3962,44 @@ export default function App() {
                           step="0.01"
                           value={selectedLead.marksPercentage || ''} 
                           onChange={(e) => setSelectedLead({ ...selectedLead, marksPercentage: e.target.value ? parseFloat(e.target.value) : undefined })}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Course Selected</label>
+                        <input 
+                          type="text" 
+                          value={selectedLead.preferredCourse || ''} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                          placeholder="e.g. B.Tech CSE"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Budget Range (₹)</label>
+                        <input 
+                          type="number" 
+                          value={selectedLead.budget || ''} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, budget: e.target.value ? parseFloat(e.target.value) : undefined })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                          placeholder="Maximum Budget Limit"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Subject / Stream</label>
-                      <input 
-                        type="text" 
-                        value={selectedLead.preferredCourse ? selectedLead.preferredCourse.split(' ')[1] || '' : ''} 
-                        onChange={(e) => {
-                          const base = selectedLead.preferredCourse ? selectedLead.preferredCourse.split(' ')[0] || 'B.Tech' : 'B.Tech';
-                          setSelectedLead({ ...selectedLead, preferredCourse: `${base} ${e.target.value}` });
-                        }}
-                        placeholder="e.g. CSE, Mechanical, Finance"
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Course Selected</label>
-                      <input 
-                        type="text" 
-                        value={selectedLead.preferredCourse || ''} 
-                        onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                      />
-                    </div>
-                    <div>
                       <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred College</label>
-                      <input 
-                        type="text" 
+                      <select 
                         value={selectedLead.preferredCollege || ''} 
                         onChange={(e) => setSelectedLead({ ...selectedLead, preferredCollege: e.target.value })}
-                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                      />
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                      >
+                        <option value="">-- Select Target College --</option>
+                        {colleges.map(c => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -3751,7 +4007,7 @@ export default function App() {
                         <select 
                           value={selectedLead.pipelineStage}
                           onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-800 dark:text-slate-200"
                         >
                           <option value="New">New Inquiries</option>
                           <option value="Counselling">Under Counselling</option>
@@ -3765,7 +4021,7 @@ export default function App() {
                         <select
                           value={selectedLead.source}
                           onChange={(e) => setSelectedLead({ ...selectedLead, source: e.target.value })}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-800 dark:text-slate-200"
                         >
                           <option value="Website">Website</option>
                           <option value="Facebook">Facebook</option>
@@ -3779,6 +4035,119 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {/* Section 3: Guardian Details & Student Profile Metadata (Active only in Counselling stage or later) */}
+                {selectedLead.studentProfile && (
+                  <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-4 space-y-3">
+                    <h4 className="text-[10px] text-indigo-500 uppercase tracking-wider font-extrabold pb-1">Guardian, Identity Cards & Photos (Student Profile)</h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
+                      {/* Guardian Inputs */}
+                      <div className="space-y-3 md:col-span-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] text-slate-400 uppercase mb-1">Father's / Guardian Name</label>
+                            <input 
+                              type="text" 
+                              value={selectedLead.studentProfile.parentName || ''} 
+                              onChange={(e) => {
+                                const sp = { ...selectedLead.studentProfile, parentName: e.target.value };
+                                setSelectedLead({ ...selectedLead, parentName: e.target.value, studentProfile: sp });
+                              }}
+                              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-slate-400 uppercase mb-1">Father's / Guardian Phone</label>
+                            <input 
+                              type="text" 
+                              value={selectedLead.studentProfile.parentPhone || ''} 
+                              onChange={(e) => {
+                                const sp = { ...selectedLead.studentProfile, parentPhone: e.target.value };
+                                setSelectedLead({ ...selectedLead, studentProfile: sp });
+                              }}
+                              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="col-span-1">
+                            <label className="block text-[10px] text-slate-400 uppercase mb-1">Caste / Category</label>
+                            <select
+                              value={selectedLead.studentProfile.category || 'General'}
+                              onChange={(e) => {
+                                const sp = { ...selectedLead.studentProfile, category: e.target.value };
+                                setSelectedLead({ ...selectedLead, studentProfile: sp });
+                              }}
+                              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
+                            >
+                              <option value="General">General</option>
+                              <option value="OBC">OBC</option>
+                              <option value="SC">SC</option>
+                              <option value="ST">ST</option>
+                              <option value="EWS">EWS</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-slate-400 uppercase mb-1">Aadhar Number</label>
+                            <input 
+                              type="text" 
+                              value={selectedLead.studentProfile.aadharNo || ''} 
+                              onChange={(e) => {
+                                const sp = { ...selectedLead.studentProfile, aadharNo: e.target.value };
+                                setSelectedLead({ ...selectedLead, studentProfile: sp });
+                              }}
+                              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                              placeholder="12-digit UID"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-slate-400 uppercase mb-1">PAN Card Number</label>
+                            <input 
+                              type="text" 
+                              value={selectedLead.studentProfile.panNo || ''} 
+                              onChange={(e) => {
+                                const sp = { ...selectedLead.studentProfile, panNo: e.target.value };
+                                setSelectedLead({ ...selectedLead, studentProfile: sp });
+                              }}
+                              className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200" 
+                              placeholder="10-character PAN"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Photo & Signature Preview */}
+                      <div className="grid grid-cols-2 gap-2 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl">
+                        <div className="flex flex-col items-center justify-center border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-1 bg-white dark:bg-slate-950 h-24">
+                          <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Photo</span>
+                          {selectedLead.studentProfile.docPhotoUrl ? (
+                            <img 
+                              src={`${API_URL}${selectedLead.studentProfile.docPhotoUrl}`} 
+                              alt="Student Photo" 
+                              className="max-h-16 w-auto object-contain rounded"
+                            />
+                          ) : (
+                            <span className="text-[8px] text-slate-500 text-center font-normal">No photo uploaded</span>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-center justify-center border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-1 bg-white dark:bg-slate-950 h-24">
+                          <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Signature</span>
+                          {selectedLead.studentProfile.docSignatureUrl ? (
+                            <img 
+                              src={`${API_URL}${selectedLead.studentProfile.docSignatureUrl}`} 
+                              alt="Student Signature" 
+                              className="max-h-16 w-auto object-contain"
+                            />
+                          ) : (
+                            <span className="text-[8px] text-slate-500 text-center font-normal">No signature uploaded</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1 text-xs font-semibold">
                   <label className="block text-[10px] text-slate-400 uppercase">Counsellor Interaction Logs / Notes</label>
