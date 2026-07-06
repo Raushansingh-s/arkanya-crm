@@ -1,11 +1,10 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import * as dotenv from 'dotenv';
 import apiRouter from './routes/api';
 import prisma from './utils/db';
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
