@@ -11,7 +11,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend, PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
-import { div } from 'framer-motion/client';
+
 
 // Types definition
 interface User {
@@ -2330,29 +2330,9 @@ export default function App() {
               </div>
 
             </div>
-          )}>
-          <span className="text-amber-500 shrink-0">✦</span>
-          <p className="leading-relaxed">B.Tech admissions are trending high in Bihar.</p>
-        </div>
-        <div className="flex gap-2">
-          <span className="text-amber-500 shrink-0">✦</span>
-          <p className="leading-relaxed">Follow up with <span className="text-[#1a6b2a]">56 leads</span> to convert into admission.</p>
-        </div>
-    </div>
-                  </div >
-    <button onClick={() => setActiveTab('ai')} className="text-center text-[10px] font-extrabold text-[#1a6b2a] hover:underline mt-4 flex items-center justify-center gap-1.5">
-      View all insights ➔
-    </button>
-                </div >
-
-              </div >
-
-            </div >
-          )
-}
-{/* FINANCE & REVENUE DASHBOARD — Director Finance Only */ }
-{
-  activeTab === 'dashboard-finance' && isDirectorFinance && (
+          )}
+          {/* FINANCE & REVENUE DASHBOARD — Director Finance Only */}
+          {activeTab === 'dashboard-finance' && isDirectorFinance && (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
