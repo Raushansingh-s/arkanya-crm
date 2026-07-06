@@ -50,6 +50,7 @@ interface Lead {
   counsellorId?: string;
   docStatus?: string;
   feeStatus?: string;
+  droppedReason?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -211,6 +212,21 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [showLeadModal, setShowLeadModal] = useState<boolean>(false);
+  const [activeModalTab, setActiveModalTab] = useState<'profile' | 'documents' | 'admission' | 'dropped'>('profile');
+
+  useEffect(() => {
+    if (selectedLead) {
+      if (selectedLead.pipelineStage === 'Lost') {
+        setActiveModalTab('dropped');
+      } else if (selectedLead.pipelineStage === 'Confirmed') {
+        setActiveModalTab('admission');
+      } else if (selectedLead.pipelineStage === 'DocPending') {
+        setActiveModalTab('documents');
+      } else {
+        setActiveModalTab('profile');
+      }
+    }
+  }, [selectedLead]);
   
   // Forms & Filter inputs
   const [searchQuery, setSearchQuery] = useState('');
@@ -3377,224 +3393,475 @@ export default function App() {
       {showLeadModal && selectedLead && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-2xl bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-8">
+            
+            {/* Header */}
             <div className="flex justify-between items-start border-b pb-3">
               <div>
-                <h3 className="text-base font-extrabold text-slate-950 dark:text-slate-100">Student Profile: {selectedLead.name}</h3>
-                <span className="text-xs text-slate-400">ID: {selectedLead.id}</span>
+                <h3 className="text-base font-extrabold text-slate-950 dark:text-slate-100">
+                  {selectedLead.name}
+                </h3>
+                <span className="text-xs text-slate-400">{selectedLead.email} • {selectedLead.phone}</span>
               </div>
               <button onClick={() => setShowLeadModal(false)} className="text-slate-400 hover:text-white">
                 <XCircle size={20} />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
-              {/* Column 1: Personal Details */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Personal & Contact Info</h4>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
-                  <input 
-                    type="text" 
-                    value={selectedLead.name} 
-                    onChange={(e) => setSelectedLead({ ...selectedLead, name: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
-                  <input 
-                    type="email" 
-                    value={selectedLead.email} 
-                    onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
-                  <input 
-                    type="text" 
-                    value={selectedLead.phone} 
-                    onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Parent's Name</label>
-                  <input 
-                    type="text" 
-                    value={selectedLead.parentName || ''} 
-                    onChange={(e) => setSelectedLead({ ...selectedLead, parentName: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">State</label>
-                    <input 
-                      type="text" 
-                      value={selectedLead.state || ''} 
-                      onChange={(e) => setSelectedLead({ ...selectedLead, state: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                    />
+            {/* Stepper Tabs */}
+            <div className="flex border-b border-slate-200 dark:border-slate-800 pb-2 gap-4">
+              <button 
+                type="button"
+                onClick={() => setActiveModalTab('profile')}
+                className={`pb-1 text-xs font-bold transition-all ${activeModalTab === 'profile' ? 'text-blue-500 border-b-2 border-blue-500 font-extrabold' : 'text-slate-400 hover:text-slate-300'}`}
+              >
+                1. Counselling & Profile
+              </button>
+              <button 
+                type="button"
+                disabled={selectedLead.pipelineStage === 'New'}
+                onClick={() => setActiveModalTab('documents')}
+                className={`pb-1 text-xs font-bold transition-all ${selectedLead.pipelineStage === 'New' ? 'opacity-30 cursor-not-allowed' : ''} ${activeModalTab === 'documents' ? 'text-blue-500 border-b-2 border-blue-500 font-extrabold' : 'text-slate-400 hover:text-slate-300'}`}
+              >
+                2. Documents Section
+              </button>
+              <button 
+                type="button"
+                disabled={selectedLead.pipelineStage === 'New' || selectedLead.pipelineStage === 'Counselling'}
+                onClick={() => setActiveModalTab('admission')}
+                className={`pb-1 text-xs font-bold transition-all ${selectedLead.pipelineStage === 'New' || selectedLead.pipelineStage === 'Counselling' ? 'opacity-30 cursor-not-allowed' : ''} ${activeModalTab === 'admission' ? 'text-blue-500 border-b-2 border-blue-500 font-extrabold' : 'text-slate-400 hover:text-slate-300'}`}
+              >
+                3. Admission Confirmation
+              </button>
+              {(selectedLead.pipelineStage === 'Lost' || activeModalTab === 'dropped') && (
+                <button 
+                  type="button"
+                  onClick={() => setActiveModalTab('dropped')}
+                  className={`pb-1 text-xs font-bold transition-all ${activeModalTab === 'dropped' ? 'text-rose-500 border-b-2 border-rose-500 font-extrabold' : 'text-rose-400/70 hover:text-rose-400'}`}
+                >
+                  Dropped Reason
+                </button>
+              )}
+            </div>
+
+            {/* TAB CONTENTS */}
+            {activeModalTab === 'profile' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+                  {/* Column 1: Personal Details */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Personal & Contact Info</h4>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
+                      <input 
+                        type="text" 
+                        value={selectedLead.name} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, name: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                      <input 
+                        type="email" 
+                        value={selectedLead.email} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
+                      <input 
+                        type="text" 
+                        value={selectedLead.phone} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Parent's Name</label>
+                      <input 
+                        type="text" 
+                        value={selectedLead.parentName || ''} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, parentName: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">State</label>
+                        <input 
+                          type="text" 
+                          value={selectedLead.state || ''} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, state: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">District / City</label>
+                        <input 
+                          type="text" 
+                          value={selectedLead.city || ''} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, city: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">City</label>
-                    <input 
-                      type="text" 
-                      value={selectedLead.city || ''} 
-                      onChange={(e) => setSelectedLead({ ...selectedLead, city: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                    />
+
+                  {/* Column 2: Academic & Workflow Details */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Counselling</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
+                        <input 
+                          type="text" 
+                          value={selectedLead.qualification || ''} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                          placeholder="e.g. 12th Pass"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Marks %</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          value={selectedLead.marksPercentage || ''} 
+                          onChange={(e) => setSelectedLead({ ...selectedLead, marksPercentage: e.target.value ? parseFloat(e.target.value) : undefined })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Subject / Stream</label>
+                      <input 
+                        type="text" 
+                        value={selectedLead.preferredCourse ? selectedLead.preferredCourse.split(' ')[1] || '' : ''} 
+                        onChange={(e) => {
+                          const base = selectedLead.preferredCourse ? selectedLead.preferredCourse.split(' ')[0] || 'B.Tech' : 'B.Tech';
+                          setSelectedLead({ ...selectedLead, preferredCourse: `${base} ${e.target.value}` });
+                        }}
+                        placeholder="e.g. CSE, Mechanical, Finance"
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Course Selected</label>
+                      <input 
+                        type="text" 
+                        value={selectedLead.preferredCourse || ''} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred College</label>
+                      <input 
+                        type="text" 
+                        value={selectedLead.preferredCollege || ''} 
+                        onChange={(e) => setSelectedLead({ ...selectedLead, preferredCollege: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Pipeline Stage</label>
+                        <select 
+                          value={selectedLead.pipelineStage}
+                          onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                        >
+                          <option value="New">New Inquiries</option>
+                          <option value="Counselling">Under Counselling</option>
+                          <option value="DocPending">Documents Pending</option>
+                          <option value="Confirmed">Admissions Confirmed</option>
+                          <option value="Lost">Dropped/Lost</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Lead Source</label>
+                        <select
+                          value={selectedLead.source}
+                          onChange={(e) => setSelectedLead({ ...selectedLead, source: e.target.value })}
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                        >
+                          <option value="Website">Website</option>
+                          <option value="Facebook">Facebook</option>
+                          <option value="WhatsApp">WhatsApp</option>
+                          <option value="Walk-in">Walk-in</option>
+                          <option value="Google">Google</option>
+                          <option value="Referral">Referral</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-xs font-semibold">
+                  <label className="block text-[10px] text-slate-400 uppercase">Counsellor Interaction Logs / Notes</label>
+                  <textarea 
+                    value={selectedLead.notes || ''} 
+                    onChange={(e) => setSelectedLead({ ...selectedLead, notes: e.target.value })}
+                    rows={2}
+                    className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-lg focus:outline-none focus:border-blue-500 font-normal leading-relaxed"
+                    placeholder="Enter interaction history, student details, etc..."
+                  />
+                </div>
+
+                <div className="flex justify-between items-center border-t pt-3">
+                  <span className="text-[10px] text-slate-400 font-extrabold">AI Priority: {selectedLead.leadScore}/100</span>
+                  <div className="flex gap-2">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const nextLead = { ...selectedLead, pipelineStage: 'DocPending' };
+                        setSelectedLead(nextLead);
+                        updateLeadDetails(selectedLead.id, nextLead);
+                      }}
+                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition"
+                    >
+                      Proceed to Documents
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
+                      className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition"
+                    >
+                      Save Profile
+                    </button>
                   </div>
                 </div>
               </div>
+            )}
 
-              {/* Column 2: Academic & Workflow Details */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Enrolment Settings</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
-                    <input 
-                      type="text" 
-                      value={selectedLead.qualification || ''} 
-                      onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                      placeholder="e.g. 12th Pass"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Marks %</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={selectedLead.marksPercentage || ''} 
-                      onChange={(e) => setSelectedLead({ ...selectedLead, marksPercentage: e.target.value ? parseFloat(e.target.value) : undefined })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                    />
-                  </div>
+            {activeModalTab === 'documents' && (
+              <div className="space-y-4">
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-[11px] font-medium text-blue-400">
+                  📄 <strong>Documents Section:</strong> View or upload files on behalf of the student. Status updates will show instantly on the student portal.
                 </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred Course</label>
-                  <input 
-                    type="text" 
-                    value={selectedLead.preferredCourse || ''} 
-                    onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred College</label>
-                  <input 
-                    type="text" 
-                    value={selectedLead.preferredCollege || ''} 
-                    onChange={(e) => setSelectedLead({ ...selectedLead, preferredCollege: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+                
+                {/* Upload Status */}
+                <div className="grid grid-cols-2 gap-3 text-xs font-semibold mb-3">
                   <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Budget Limit</label>
-                    <input 
-                      type="number" 
-                      value={selectedLead.budget || ''} 
-                      onChange={(e) => setSelectedLead({ ...selectedLead, budget: e.target.value ? parseFloat(e.target.value) : undefined })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Lead Source</label>
-                    <select
-                      value={selectedLead.source}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, source: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal"
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Overall Doc Verification Status</label>
+                    <select 
+                      value={selectedLead.docStatus || 'Pending'}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, docStatus: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
                     >
-                      <option value="Website">Website</option>
-                      <option value="Facebook">Facebook</option>
-                      <option value="WhatsApp">WhatsApp</option>
-                      <option value="Walk-in">Walk-in</option>
-                      <option value="Google">Google</option>
-                      <option value="Referral">Referral</option>
-                      <option value="Other">Other</option>
+                      <option value="Pending">Pending Upload</option>
+                      <option value="Under Review">Under Review</option>
+                      <option value="Verified">Verified / Approved</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Fee Payment Status</label>
+                    <select 
+                      value={selectedLead.feeStatus || 'Pending'}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, feeStatus: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Paid">Paid</option>
                     </select>
                   </div>
                 </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { label: '10th Marksheet', field: 'marksheet10', req: true },
+                    { label: '12th Marksheet / Diploma', field: 'marksheet12', req: true },
+                    { label: 'Aadhar Card', field: 'aadhar', req: true },
+                    { label: 'Passport Photo', field: 'passport', req: true },
+                    { label: 'Caste Certificate', field: 'casteCert', req: false },
+                    { label: 'Migration Certificate', field: 'migCert', req: true },
+                  ].map(doc => {
+                    const isUploaded = selectedLead.docStatus === 'Verified' || selectedLead.docStatus === 'Under Review';
+                    return (
+                      <div key={doc.field} className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/40 dark:border-slate-800/40 bg-slate-100/30 dark:bg-slate-900/30 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${selectedLead.docStatus === 'Verified' ? 'bg-emerald-500' : selectedLead.docStatus === 'Under Review' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+                          <div>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">{doc.label}</span>
+                            <span className="text-[10px] block text-slate-400">
+                              {selectedLead.docStatus === 'Verified' ? 'Verified ✓' : selectedLead.docStatus === 'Under Review' ? 'Under Review ⏳' : 'Not Uploaded ❌'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedLead({ ...selectedLead, docStatus: 'Under Review' });
+                              alert(`${doc.label} simulated upload complete!`);
+                            }}
+                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold rounded text-[10px] transition"
+                          >
+                            Upload File
+                          </button>
+                          {isUploaded && (
+                            <button
+                              type="button"
+                              onClick={() => alert(`Opening simulated viewer for: ${doc.label}`)}
+                              className="px-2 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-bold rounded text-[10px] transition"
+                            >
+                              View Doc
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-end gap-2 border-t pt-3">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const nextLead = { ...selectedLead, pipelineStage: 'Confirmed' };
+                      setSelectedLead(nextLead);
+                      updateLeadDetails(selectedLead.id, nextLead);
+                    }}
+                    className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition"
+                  >
+                    Proceed to Admission
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
+                    className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition"
+                  >
+                    Save Documents Status
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Workflow Settings */}
-            <div className="space-y-3 text-xs font-semibold border-t pt-3">
-              <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Workflow, Documents & Fees</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Pipeline Stage</label>
-                  <select 
-                    value={selectedLead.pipelineStage}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
-                  >
-                    <option value="New">New Inquiries</option>
-                    <option value="Counselling">Under Counselling</option>
-                    <option value="DocPending">Documents Pending</option>
-                    <option value="Confirmed">Admissions Confirmed</option>
-                    <option value="Lost">Dropped/Lost</option>
-                  </select>
+            {activeModalTab === 'admission' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-medium text-emerald-400 space-y-1">
+                  🎉 <strong>Admission Confirmation:</strong> The student onboarding journey is complete! Here is the dynamic overview of the student's admission record.
                 </div>
 
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Document Status</label>
-                  <select 
-                    value={selectedLead.docStatus || 'Pending'}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, docStatus: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Under Review">Under Review</option>
-                    <option value="Verified">Verified</option>
-                  </select>
+                <div className="glass-card p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/40 space-y-3 text-xs font-semibold">
+                  <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Final Admission Details</h4>
+                  
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Student Name</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold block mt-0.5">{selectedLead.name}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Phone / Email</span>
+                      <span className="text-slate-800 dark:text-slate-200 block mt-0.5">{selectedLead.phone} • {selectedLead.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Course Selected</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-extrabold text-blue-500 block mt-0.5">{selectedLead.preferredCourse || 'Not Selected'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Subject / Stream</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold block mt-0.5">
+                        {selectedLead.preferredCourse ? selectedLead.preferredCourse.split(' ')[1] || 'General' : 'N/A'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Allotted College</span>
+                      <span className="text-slate-800 dark:text-slate-200 block mt-0.5">{selectedLead.preferredCollege || 'Not Specified'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Geographic Location</span>
+                      <span className="text-slate-800 dark:text-slate-200 block mt-0.5">{selectedLead.city || 'District N/A'}, {selectedLead.state || 'State N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Document Status</span>
+                      <span className="text-emerald-500 font-extrabold block mt-0.5">{selectedLead.docStatus === 'Verified' ? 'All Verified ✓' : 'Verification Complete'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Fee Status</span>
+                      <select 
+                        value={selectedLead.feeStatus || 'Pending'}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, feeStatus: e.target.value })}
+                        className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded focus:outline-none text-xs mt-1"
+                      >
+                        <option value="Pending">Pending Payment</option>
+                        <option value="Paid">Paid / Complete</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Fee Status</label>
-                  <select 
-                    value={selectedLead.feeStatus || 'Pending'}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, feeStatus: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                <div className="flex justify-end gap-2 border-t pt-3">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const nextLead = { ...selectedLead, pipelineStage: 'Lost' };
+                      setSelectedLead(nextLead);
+                      setActiveModalTab('dropped');
+                    }}
+                    className="px-4 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition mr-auto"
                   >
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                  </select>
+                    Mark as Dropped
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold rounded-xl shadow-md transition"
+                  >
+                    Confirm Admission ✓
+                  </button>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Interaction Notes */}
-            <div className="space-y-1 text-xs font-semibold">
-              <label className="block text-[10px] text-slate-400 uppercase">Counsellor Interaction Logs / Notes</label>
-              <textarea 
-                value={selectedLead.notes || ''} 
-                onChange={(e) => setSelectedLead({ ...selectedLead, notes: e.target.value })}
-                rows={3}
-                className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-lg focus:outline-none focus:border-blue-500 font-normal leading-relaxed"
-                placeholder="Enter interaction history, student details, etc..."
-              />
-            </div>
+            {activeModalTab === 'dropped' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs font-medium text-rose-400">
+                  ⚠️ <strong>Dropped Student Profile:</strong> If the student has dropped out or cancelled their admission, document the exact reason below.
+                </div>
 
-            {/* Save Button */}
-            <div className="flex justify-end gap-3 border-t pt-3">
-              <button 
-                onClick={() => setShowLeadModal(false)}
-                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-xl transition"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md transition"
-              >
-                Save Changes
-              </button>
-            </div>
+                <div className="space-y-3 text-xs font-semibold">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Pipeline Stage</label>
+                    <select 
+                      value={selectedLead.pipelineStage}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal"
+                    >
+                      <option value="New">New Inquiries</option>
+                      <option value="Counselling">Under Counselling</option>
+                      <option value="DocPending">Documents Pending</option>
+                      <option value="Confirmed">Admissions Confirmed</option>
+                      <option value="Lost">Dropped/Lost</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Reason for Dropping Out</label>
+                    <textarea 
+                      value={selectedLead.droppedReason || ''} 
+                      onChange={(e) => setSelectedLead({ ...selectedLead, droppedReason: e.target.value })}
+                      rows={4}
+                      className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-lg focus:outline-none focus:border-rose-500 font-normal leading-relaxed"
+                      placeholder="e.g. Selected another college, financial difficulties, course not available..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 border-t pt-3">
+                  <button 
+                    type="button"
+                    onClick={() => updateLeadDetails(selectedLead.id, { ...selectedLead, pipelineStage: 'Lost' })}
+                    className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold rounded-xl shadow-md transition"
+                  >
+                    Save Dropped Status
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       )}

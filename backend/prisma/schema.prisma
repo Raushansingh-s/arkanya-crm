@@ -200,6 +200,7 @@ model Lead {
   creatorId           String?   @db.ObjectId
   docStatus           String    @default("Pending") // Pending, Under Review, Verified
   feeStatus           String    @default("Pending") // Paid, Pending
+  droppedReason       String?
   notes               String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
