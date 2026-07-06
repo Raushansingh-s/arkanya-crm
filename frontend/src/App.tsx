@@ -279,6 +279,7 @@ export default function App() {
   const [newLeadCourse, setNewLeadCourse] = useState('B.Tech CSE');
   const [newLeadCollege, setNewLeadCollege] = useState('Amity School of Engineering & Technology');
   const [newLeadSource, setNewLeadSource] = useState('Website');
+  const [newLeadQualification, setNewLeadQualification] = useState('');
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
 
   // Student specific uploads
@@ -480,6 +481,7 @@ export default function App() {
           preferredCourse: newLeadCourse,
           preferredCollege: newLeadCollege,
           source: newLeadSource,
+          qualification: newLeadQualification,
         })
       });
 
@@ -488,6 +490,7 @@ export default function App() {
         setNewLeadName('');
         setNewLeadPhone('');
         setNewLeadEmail('');
+        setNewLeadQualification('');
         fetchMasterData();
       }
     } catch (e) {
@@ -766,6 +769,35 @@ export default function App() {
       { label: "Transaction Date", value: new Date(tx.createdAt).toLocaleDateString() },
       { label: "Ledger Description", value: tx.description }
     ]);
+  };
+
+  // Download Student Application Form as PDF for confirmed admissions
+  const handleDownloadApplicationForm = (lead: any) => {
+    const appId = `ARK-APP-${lead.id?.slice(-6).toUpperCase() || 'XXXXXX'}`;
+    downloadAsPDF(
+      "STUDENT APPLICATION FORM — ARKANYA EDUTECH PVT. LTD.",
+      `Application_Form_${lead.name?.replace(/\s+/g, '_') || 'Student'}_${appId}.pdf`,
+      [
+        { label: "Application ID",        value: appId },
+        { label: "Student Full Name",      value: lead.name || '—' },
+        { label: "Phone Number",           value: lead.phone || '—' },
+        { label: "Email Address",          value: lead.email || '—' },
+        { label: "Parent / Guardian Name", value: lead.parentName || '—' },
+        { label: "State",                  value: lead.state || '—' },
+        { label: "City / District",        value: lead.city || '—' },
+        { label: "Prior Qualification",    value: lead.qualification || '—' },
+        { label: "Marks %",               value: lead.marksPercentage ? `${lead.marksPercentage}%` : '—' },
+        { label: "Preferred Course",       value: lead.preferredCourse || '—' },
+        { label: "Preferred College",      value: lead.preferredCollege || '—' },
+        { label: "Budget Range",           value: lead.budget ? `₹${Number(lead.budget).toLocaleString('en-IN')}` : '—' },
+        { label: "Lead Source",            value: lead.source || '—' },
+        { label: "Document Status",        value: lead.docStatus || 'Pending' },
+        { label: "Fee Status",             value: lead.feeStatus || 'Pending' },
+        { label: "Admission Stage",        value: lead.pipelineStage || '—' },
+        { label: "Application Date",       value: new Date(lead.createdAt).toLocaleDateString() },
+        { label: "Generated On",           value: new Date().toLocaleString() },
+      ]
+    );
   };
 
   // Render Pipeline Column
@@ -3573,13 +3605,25 @@ export default function App() {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
-                        <input 
-                          type="text" 
+                        <select
                           value={selectedLead.qualification || ''} 
                           onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal" 
-                          placeholder="e.g. 12th Pass"
-                        />
+                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
+                        >
+                          <option value="">-- Select Qualification --</option>
+                          <option value="10th Pass">10th Pass (Matric)</option>
+                          <option value="12th Pass - Science">12th Pass – Science (PCM/PCB)</option>
+                          <option value="12th Pass - Commerce">12th Pass – Commerce</option>
+                          <option value="12th Pass - Arts">12th Pass – Arts / Humanities</option>
+                          <option value="Diploma">Diploma (3-year Polytechnic)</option>
+                          <option value="Graduation">Graduation (Any Stream)</option>
+                          <option value="B.Tech">B.Tech / B.E.</option>
+                          <option value="B.Sc">B.Sc</option>
+                          <option value="B.Com">B.Com</option>
+                          <option value="B.A.">B.A.</option>
+                          <option value="Post Graduation">Post Graduation (M.Tech / MBA / M.Sc)</option>
+                          <option value="Other">Other</option>
+                        </select>
                       </div>
                       <div>
                         <label className="block text-[10px] text-slate-400 uppercase mb-1">Marks %</label>
@@ -3835,6 +3879,14 @@ export default function App() {
                       <span className="text-slate-800 dark:text-slate-200 block mt-0.5">{selectedLead.city || 'District N/A'}, {selectedLead.state || 'State N/A'}</span>
                     </div>
                     <div>
+                      <span className="text-[10px] text-slate-400 block">Prior Qualification</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold block mt-0.5">{selectedLead.qualification || 'Not Specified'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Marks %</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-bold block mt-0.5">{selectedLead.marksPercentage ? `${selectedLead.marksPercentage}%` : 'N/A'}</span>
+                    </div>
+                    <div>
                       <span className="text-[10px] text-slate-400 block">Document Status</span>
                       <span className="text-emerald-500 font-extrabold block mt-0.5">{selectedLead.docStatus === 'Verified' ? 'All Verified ✓' : 'Verification Complete'}</span>
                     </div>
@@ -3874,6 +3926,13 @@ export default function App() {
                     className="px-4 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition mr-auto"
                   >
                     Mark as Dropped
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadApplicationForm(selectedLead)}
+                    className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition"
+                  >
+                    ⬇ Download Application PDF
                   </button>
                   <button 
                     type="button"
@@ -4197,15 +4256,35 @@ export default function App() {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred Course</label>
+                <input
+                  type="text"
+                  value={newLeadCourse}
+                  onChange={(e) => setNewLeadCourse(e.target.value)}
+                  className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none"
+                  placeholder="e.g. B.Tech CSE"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred Course</label>
-                  <input
-                    type="text"
-                    value={newLeadCourse}
-                    onChange={(e) => setNewLeadCourse(e.target.value)}
+                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
+                  <select
+                    value={newLeadQualification}
+                    onChange={(e) => setNewLeadQualification(e.target.value)}
                     className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none"
-                  />
+                  >
+                    <option value="">-- Select --</option>
+                    <option value="10th Pass">10th Pass</option>
+                    <option value="12th Pass - Science">12th – Science</option>
+                    <option value="12th Pass - Commerce">12th – Commerce</option>
+                    <option value="12th Pass - Arts">12th – Arts</option>
+                    <option value="Diploma">Diploma</option>
+                    <option value="Graduation">Graduation</option>
+                    <option value="Post Graduation">Post Graduation</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-400 uppercase mb-1">Lead Source</label>
