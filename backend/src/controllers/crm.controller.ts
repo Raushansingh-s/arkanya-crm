@@ -203,12 +203,23 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
     const existingProfile = studentUser?.studentProfile;
 
     const isProfileFilled = !!(
-      existingProfile && (
-        existingProfile.aadharNo ||
-        existingProfile.panNo ||
-        existingProfile.parentName ||
-        existingProfile.parentPhone
-      )
+      existingLead.name && existingLead.name.trim() !== '' &&
+      existingLead.email && existingLead.email.trim() !== '' &&
+      existingLead.phone && existingLead.phone.trim() !== '' &&
+      existingLead.address && existingLead.address.trim() !== '' &&
+      existingLead.state && existingLead.state.trim() !== '' &&
+      existingLead.city && existingLead.city.trim() !== '' &&
+      existingLead.qualification && existingLead.qualification.trim() !== '' &&
+      existingLead.marksPercentage !== null && existingLead.marksPercentage !== undefined &&
+      existingLead.preferredCourse && existingLead.preferredCourse.trim() !== '' &&
+      existingLead.budget !== null && existingLead.budget !== undefined &&
+      existingLead.preferredCollege && existingLead.preferredCollege.trim() !== '' &&
+      existingProfile &&
+      existingProfile.parentName && existingProfile.parentName.trim() !== '' &&
+      existingProfile.parentPhone && existingProfile.parentPhone.trim() !== '' &&
+      existingProfile.category && existingProfile.category.trim() !== '' &&
+      existingProfile.aadharNo && existingProfile.aadharNo.trim() !== '' &&
+      existingProfile.panNo && existingProfile.panNo.trim() !== ''
     );
 
     const isCounsellor = req.user?.role === 'COUNSELLOR';

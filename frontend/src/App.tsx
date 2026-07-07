@@ -4903,12 +4903,23 @@ export default function App() {
         {/* TAB CONTENTS */}
         {activeModalTab === 'profile' && (() => {
           const isProfileFilled = !!(
-            selectedLead.studentProfile && (
-              selectedLead.studentProfile.aadharNo ||
-              selectedLead.studentProfile.panNo ||
-              selectedLead.studentProfile.parentName ||
-              selectedLead.studentProfile.parentPhone
-            )
+            selectedLead.name?.trim() &&
+            selectedLead.email?.trim() &&
+            selectedLead.phone?.trim() &&
+            selectedLead.address?.trim() &&
+            selectedLead.state?.trim() &&
+            selectedLead.city?.trim() &&
+            selectedLead.qualification?.trim() &&
+            selectedLead.marksPercentage !== undefined && selectedLead.marksPercentage !== null &&
+            selectedLead.preferredCourse?.trim() &&
+            selectedLead.budget !== undefined && selectedLead.budget !== null &&
+            selectedLead.preferredCollege?.trim() &&
+            selectedLead.studentProfile &&
+            selectedLead.studentProfile.parentName?.trim() &&
+            selectedLead.studentProfile.parentPhone?.trim() &&
+            selectedLead.studentProfile.category?.trim() &&
+            selectedLead.studentProfile.aadharNo?.trim() &&
+            selectedLead.studentProfile.panNo?.trim()
           );
           const isProfileLocked = isProfileFilled && currentUser?.role === 'COUNSELLOR';
 
