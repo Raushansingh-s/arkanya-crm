@@ -42,6 +42,7 @@ router.post('/crm/student/reset-password', authenticateJWT, crmController.resetS
 // ==========================================
 router.get('/erp/universities', authenticateJWT, erpController.getUniversities);
 router.post('/erp/universities/create', authenticateJWT, erpController.createUniversity);
+router.patch('/erp/universities/:id', authenticateJWT, erpController.updateUniversity);
 router.get('/erp/colleges', authenticateJWT, erpController.getColleges);
 router.post('/erp/colleges/create', authenticateJWT, erpController.createCollege);
 router.patch('/erp/colleges/:id', authenticateJWT, erpController.updateCollege);

@@ -80,6 +80,9 @@ interface University {
   nirfRanking: number;
   state: string;
   city: string;
+  website?: string;
+  email?: string;
+  phone?: string;
 }
 
 interface College {
@@ -195,6 +198,29 @@ export default function App() {
     highestPackage: '',
     averagePackage: '',
     infrastructureNotes: '',
+  });
+
+  // University Management States
+  const [collegeSubTab, setCollegeSubTab] = useState<'colleges' | 'universities'>('colleges');
+  const [uniView, setUniView] = useState<'list' | 'add' | 'edit'>('list');
+  const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
+  const [uniSearch, setUniSearch] = useState('');
+  const [isSavingUniversity, setIsSavingUniversity] = useState(false);
+  const [universitySaveMsg, setUniversitySaveMsg] = useState('');
+
+  // University Form State
+  const [uniForm, setUniForm] = useState({
+    name: '',
+    logoUrl: '',
+    ugcApproved: true,
+    aicteApproved: false,
+    naacGrade: 'A',
+    nirfRanking: '',
+    website: '',
+    email: '',
+    phone: '',
+    state: '',
+    city: ''
   });
 
   // Add Course to College Form
@@ -2911,11 +2937,38 @@ export default function App() {
 {
   (activeTab === 'colleges' || activeTab === 'colleges-readonly') && (
     <div className="space-y-6">
+      {/* Sub-tab switcher */}
+      {collegeView === 'list' && uniView === 'list' && (
+        <div className="flex space-x-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/30 max-w-xs mb-2">
+          <button
+            onClick={() => setCollegeSubTab('colleges')}
+            className={`flex-1 text-center py-2 rounded-lg text-xs font-semibold transition ${
+              collegeSubTab === 'colleges'
+                ? 'bg-blue-600 text-white shadow'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            Colleges
+          </button>
+          <button
+            onClick={() => setCollegeSubTab('universities')}
+            className={`flex-1 text-center py-2 rounded-lg text-xs font-semibold transition ${
+              collegeSubTab === 'universities'
+                ? 'bg-blue-600 text-white shadow'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            Universities
+          </button>
+        </div>
+      )}
 
-      {/* =========================================
-                  LIST VIEW - College Directory
-              ========================================= */}
-      {collegeView === 'list' && (
+      {collegeSubTab === 'colleges' ? (
+        <>
+          {/* =========================================
+                      LIST VIEW - College Directory
+                  ========================================= */}
+          {collegeView === 'list' && (
         <>
           {/* Toolbar: Search + Add */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -3779,6 +3832,331 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+        </>
+      ) : (
+        <>
+          {uniView === 'list' && (
+            <>
+              {/* Toolbar: Search + Add */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="relative flex-1 max-w-md">
+                    <Search size={15} className="absolute left-3 top-2.5 text-slate-400" />
+                    <input
+                      type="text"
+                      value={uniSearch}
+                      onChange={e => setUniSearch(e.target.value)}
+                      placeholder="Search by university name, state, city..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+                    {universities.filter(u => u.name.toLowerCase().includes(uniSearch.toLowerCase()) || u.state?.toLowerCase().includes(uniSearch.toLowerCase()) || u.city?.toLowerCase().includes(uniSearch.toLowerCase())).length} Universities Found
+                  </span>
+                </div>
+                {activeTab !== 'colleges-readonly' && (
+                  <button
+                    onClick={() => {
+                      setUniForm({ name: '', logoUrl: '', ugcApproved: true, aicteApproved: false, naacGrade: 'A', nirfRanking: '', website: '', email: '', phone: '', state: '', city: '' });
+                      setUniView('add');
+                      setUniversitySaveMsg('');
+                    }}
+                    className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center space-x-2"
+                  >
+                    <PlusCircle size={15} />
+                    <span>Add New University</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Summary Stats Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { label: 'Total Universities', value: universities.length, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                  { label: 'UGC Approved', value: universities.filter(u => u.ugcApproved).length, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                  { label: 'AICTE Approved', value: universities.filter(u => u.aicteApproved).length, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+                  { label: 'Top 100 NIRF', value: universities.filter(u => u.nirfRanking && u.nirfRanking <= 100).length, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                ].map(stat => (
+                  <div key={stat.label} className={`glass-card p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/30 flex flex-col`}>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">{stat.label}</span>
+                    <span className={`text-2xl font-extrabold mt-1 ${stat.color}`}>{stat.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* University Cards Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {universities.filter(u => u.name.toLowerCase().includes(uniSearch.toLowerCase()) || u.state?.toLowerCase().includes(uniSearch.toLowerCase()) || u.city?.toLowerCase().includes(uniSearch.toLowerCase())).length === 0 ? (
+                  <div className="lg:col-span-2 glass-card p-10 rounded-2xl border border-slate-200/40 dark:border-slate-800/30 text-center text-slate-400">
+                    <School size={36} className="mx-auto mb-2 opacity-30" />
+                    <p className="font-semibold text-sm">No universities found</p>
+                  </div>
+                ) : (
+                  universities
+                    .filter(u => u.name.toLowerCase().includes(uniSearch.toLowerCase()) || u.state?.toLowerCase().includes(uniSearch.toLowerCase()) || u.city?.toLowerCase().includes(uniSearch.toLowerCase()))
+                    .map(uni => {
+                      const associatedCollegesCount = colleges.filter(c => c.universityId === uni.id || c.university?.id === uni.id).length;
+                      return (
+                        <div key={uni.id} className="glass-card rounded-2xl border border-slate-200/40 dark:border-slate-800/30 overflow-hidden hover:border-blue-500/40 transition-all">
+                          <div className="p-5 flex justify-between items-start">
+                            <div className="flex items-start space-x-4">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md shadow-indigo-500/20 flex-shrink-0">
+                                {uni.logoUrl ? (
+                                  <img src={uni.logoUrl} alt={uni.name} className="w-full h-full object-cover rounded-xl" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+                                ) : uni.name.charAt(0)}
+                              </div>
+                              <div>
+                                <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 leading-snug">{uni.name}</h3>
+                                <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                  <MapPin size={11} />{uni.city}, {uni.state}
+                                </span>
+                                {uni.website && (
+                                  <a href={uni.website} target="_blank" rel="noreferrer" className="text-[11px] text-blue-500 hover:underline flex items-center gap-1 mt-0.5">
+                                    <Link size={11} />{uni.website}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1.5">
+                              {uni.naacGrade && (
+                                <span className="bg-blue-500/15 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] px-2 py-0.5 rounded-full border border-blue-500/25">
+                                  NAAC {uni.naacGrade}
+                                </span>
+                              )}
+                              {uni.nirfRanking && (
+                                <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded-full border border-amber-500/25">
+                                  NIRF #{uni.nirfRanking}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 border-t border-slate-200/40 dark:border-slate-800/40 text-center text-xs">
+                            <div className="p-3 border-r border-slate-200/40 dark:border-slate-800/40">
+                              <span className="text-[10px] text-slate-400 block uppercase">Colleges</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200">{associatedCollegesCount}</span>
+                            </div>
+                            <div className="p-3 border-r border-slate-200/40 dark:border-slate-800/40">
+                              <span className="text-[10px] text-slate-400 block uppercase">UGC status</span>
+                              <span className={`font-bold ${uni.ugcApproved ? 'text-emerald-500' : 'text-slate-400'}`}>{uni.ugcApproved ? 'Approved' : 'N/A'}</span>
+                            </div>
+                            <div className="p-3">
+                              <span className="text-[10px] text-slate-400 block uppercase">AICTE status</span>
+                              <span className={`font-bold ${uni.aicteApproved ? 'text-emerald-500' : 'text-slate-400'}`}>{uni.aicteApproved ? 'Approved' : 'N/A'}</span>
+                            </div>
+                          </div>
+
+                          <div className="px-5 py-3 border-t border-slate-200/40 dark:border-slate-800/40 flex justify-end items-center">
+                            {activeTab !== 'colleges-readonly' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedUniversity(uni);
+                                  setUniForm({
+                                    name: uni.name,
+                                    logoUrl: uni.logoUrl || '',
+                                    ugcApproved: uni.ugcApproved,
+                                    aicteApproved: uni.aicteApproved,
+                                    naacGrade: uni.naacGrade || 'A',
+                                    nirfRanking: uni.nirfRanking?.toString() || '',
+                                    website: uni.website || '',
+                                    email: uni.email || '',
+                                    phone: uni.phone || '',
+                                    state: uni.state,
+                                    city: uni.city
+                                  });
+                                  setUniView('edit');
+                                  setUniversitySaveMsg('');
+                                }}
+                                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg text-slate-800 dark:text-slate-200"
+                              >
+                                <Edit3 size={12} /> Edit University
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+            </>
+          )}
+
+          {(uniView === 'add' || uniView === 'edit') && (
+            <>
+              <button onClick={() => setUniView('list')} className="flex items-center space-x-2 text-xs font-semibold text-blue-500 hover:text-blue-400 mb-2">
+                <ArrowLeft size={14} />
+                <span>Back to Universities Directory</span>
+              </button>
+
+              <div className="glass-card rounded-2xl border border-slate-200/40 dark:border-slate-800/30 p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200/40 dark:border-slate-800/40">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                    {uniView === 'add' ? <PlusCircle size={18} className="text-white" /> : <Edit3 size={18} className="text-white" />}
+                  </div>
+                  <div>
+                    <h2 className="font-extrabold text-base">{uniView === 'add' ? 'Add New University' : `Edit: ${selectedUniversity?.name}`}</h2>
+                    <p className="text-xs text-slate-400">Fill all sections below. Fields marked with * are required.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  {/* Section 1: Basic Info */}
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-blue-500 mb-4 flex items-center gap-2">
+                      <Building2 size={13} /> 1. Basic Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="md:col-span-2">
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">University Name *</label>
+                        <input type="text" value={uniForm.name} onChange={e => setUniForm(p => ({ ...p, name: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="e.g. Amity University" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">State *</label>
+                        <input type="text" value={uniForm.state} onChange={e => setUniForm(p => ({ ...p, state: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="e.g. Uttar Pradesh" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">City *</label>
+                        <input type="text" value={uniForm.city} onChange={e => setUniForm(p => ({ ...p, city: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="e.g. Noida" />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Logo URL</label>
+                        <input type="text" value={uniForm.logoUrl} onChange={e => setUniForm(p => ({ ...p, logoUrl: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="e.g. https://domain.com/logo.png" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Accreditation & Rankings */}
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2">
+                      <Award size={13} /> 2. Accreditation & Rankings
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">NAAC Grade</label>
+                        <select value={uniForm.naacGrade} onChange={e => setUniForm(p => ({ ...p, naacGrade: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                          {['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C', 'Not Rated'].map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">NIRF Ranking</label>
+                        <input type="number" value={uniForm.nirfRanking} onChange={e => setUniForm(p => ({ ...p, nirfRanking: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="e.g. 35" />
+                      </div>
+                      <div className="flex flex-col justify-end">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={uniForm.ugcApproved} onChange={e => setUniForm(p => ({ ...p, ugcApproved: e.target.checked }))}
+                            className="w-4 h-4 rounded accent-blue-600" />
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">UGC Approved</span>
+                        </label>
+                      </div>
+                      <div className="flex flex-col justify-end">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={uniForm.aicteApproved} onChange={e => setUniForm(p => ({ ...p, aicteApproved: e.target.checked }))}
+                            className="w-4 h-4 rounded accent-blue-600" />
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">AICTE Approved</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 3: Contact Details */}
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-indigo-500 mb-4 flex items-center gap-2">
+                      <Phone size={13} /> 3. Contact Details
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Official Email</label>
+                        <input type="email" value={uniForm.email} onChange={e => setUniForm(p => ({ ...p, email: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="info@university.edu" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Phone Number</label>
+                        <input type="tel" value={uniForm.phone} onChange={e => setUniForm(p => ({ ...p, phone: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="+91 99999 88888" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 uppercase mb-1">Website URL</label>
+                        <input type="url" value={uniForm.website} onChange={e => setUniForm(p => ({ ...p, website: e.target.value }))}
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                          placeholder="https://www.university.edu" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Footer */}
+                <div className="mt-8 pt-5 border-t border-slate-200/40 dark:border-slate-800/40 flex justify-between items-center">
+                  {universitySaveMsg && (
+                    <span className={`text-sm font-semibold ${universitySaveMsg.includes('successfully') ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {universitySaveMsg}
+                    </span>
+                  )}
+                  <div className="flex gap-3 ml-auto">
+                    <button
+                      onClick={() => setUniView('list')}
+                      className="px-5 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-200/60 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-700 rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={isSavingUniversity}
+                      onClick={async () => {
+                        if (!uniForm.name || !uniForm.state || !uniForm.city) {
+                          setUniversitySaveMsg('Please fill required fields: Name, State, City.');
+                          return;
+                        }
+                        setIsSavingUniversity(true);
+                        setUniversitySaveMsg('');
+                        try {
+                          const isEdit = uniView === 'edit';
+                          const url = isEdit ? `${API_URL}/api/erp/universities/${selectedUniversity?.id}` : `${API_URL}/api/erp/universities/create`;
+                          const method = isEdit ? 'PATCH' : 'POST';
+                          const res = await fetch(url, {
+                            method,
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                            body: JSON.stringify({
+                              ...uniForm,
+                              nirfRanking: uniForm.nirfRanking ? parseInt(uniForm.nirfRanking) : null,
+                            }),
+                          });
+                          if (res.ok) {
+                            setUniversitySaveMsg('University saved successfully!');
+                            await fetchMasterData();
+                            setTimeout(() => setUniView('list'), 1200);
+                          } else {
+                            const err = await res.json();
+                            setUniversitySaveMsg(`Error: ${err.error}`);
+                          }
+                        } catch (e: any) {
+                          setUniversitySaveMsg(`Network error: ${e.message}`);
+                        } finally {
+                          setIsSavingUniversity(false);
+                        }
+                      }}
+                      className="px-6 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow flex items-center gap-2 disabled:opacity-60"
+                    >
+                      {isSavingUniversity ? 'Saving...' : uniView === 'add' ? 'Add University' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </>
       )}
 
     </div>

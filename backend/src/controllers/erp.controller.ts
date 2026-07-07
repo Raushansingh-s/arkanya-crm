@@ -52,6 +52,34 @@ export async function createUniversity(req: AuthenticatedRequest, res: Response)
   }
 }
 
+export async function updateUniversity(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const { name, logoUrl, ugcApproved, aicteApproved, naacGrade, nirfRanking, website, email, phone, state, city } = req.body;
+
+    const university = await prisma.university.update({
+      where: { id },
+      data: {
+        name,
+        logoUrl: logoUrl !== undefined ? logoUrl : undefined,
+        ugcApproved: ugcApproved !== undefined ? !!ugcApproved : undefined,
+        aicteApproved: aicteApproved !== undefined ? !!aicteApproved : undefined,
+        naacGrade,
+        nirfRanking: nirfRanking ? parseInt(nirfRanking) : null,
+        website,
+        email,
+        phone,
+        state,
+        city
+      }
+    });
+
+    return res.status(200).json(university);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
 export async function getColleges(req: AuthenticatedRequest, res: Response) {
   try {
     const tenantId = req.user?.tenantId;
