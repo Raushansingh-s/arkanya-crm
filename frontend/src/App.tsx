@@ -4901,432 +4901,472 @@ export default function App() {
         </div>
 
         {/* TAB CONTENTS */}
-        {activeModalTab === 'profile' && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
-              {/* Column 1: Personal Details */}
-              {/* Column 1: Personal Details */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Personal & Contact Info</h4>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    value={selectedLead.name}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, name: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                  />
+        {activeModalTab === 'profile' && (() => {
+          const isProfileFilled = !!(
+            selectedLead.studentProfile && (
+              selectedLead.studentProfile.aadharNo ||
+              selectedLead.studentProfile.panNo ||
+              selectedLead.studentProfile.parentName ||
+              selectedLead.studentProfile.parentPhone
+            )
+          );
+          const isProfileLocked = isProfileFilled && currentUser?.role === 'COUNSELLOR';
+
+          return (
+            <div className="space-y-4">
+              {isProfileLocked && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2 mb-3">
+                  <AlertTriangle size={14} className="animate-pulse flex-shrink-0" />
+                  <span>🔒 <strong>Profile Locked:</strong> Counseling details have been completed. Editing is disabled for Lead Management.</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+                {/* Column 1: Personal Details */}
+                {/* Column 1: Personal Details */}
+                <div className="space-y-3">
+                  <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Personal & Contact Info</h4>
                   <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
                     <input
-                      type="email"
-                      value={selectedLead.email}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
+                      type="text"
+                      value={selectedLead.name}
+                      disabled={isProfileLocked}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, name: e.target.value })}
                       className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                      <input
+                        type="email"
+                        value={selectedLead.email}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, email: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
+                      <input
+                        type="text"
+                        value={selectedLead.phone}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
-                    <input
-                      type="text"
-                      value={selectedLead.phone}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, phone: e.target.value })}
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Address</label>
+                    <textarea
+                      value={selectedLead.address || ''}
+                      disabled={isProfileLocked}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, address: e.target.value })}
+                      placeholder="House / Street, Area, LandMark"
+                      rows={2}
                       className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">State</label>
+                      <input
+                        type="text"
+                        value={selectedLead.state || ''}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, state: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">District / City</label>
+                      <input
+                        type="text"
+                        value={selectedLead.city || ''}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, city: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Full Address</label>
-                  <textarea
-                    value={selectedLead.address || ''}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, address: e.target.value })}
-                    placeholder="House / Street, Area, LandMark"
-                    rows={2}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">State</label>
-                    <input
-                      type="text"
-                      value={selectedLead.state || ''}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, state: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                    />
+ 
+                {/* Column 2: Academic & Workflow Details */}
+                <div className="space-y-3">
+                  <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Onboarding</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
+                      <select
+                        value={selectedLead.qualification || ''}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
+                      >
+                        <option value="">-- Select --</option>
+                        <option value="10th Pass">10th Pass (Matric)</option>
+                        <option value="12th Pass - Science">12th Pass – Science (PCM/PCB)</option>
+                        <option value="12th Pass - Commerce">12th Pass – Commerce</option>
+                        <option value="12th Pass - Arts">12th Pass – Arts</option>
+                        <option value="Diploma">Diploma (3-year Polytechnic)</option>
+                        <option value="Graduation">Graduation (Any Stream)</option>
+                        <option value="B.Tech">B.Tech / B.E.</option>
+                        <option value="B.Sc">B.Sc</option>
+                        <option value="B.Com">B.Com</option>
+                        <option value="B.A.">B.A.</option>
+                        <option value="Post Graduation">Post Graduation</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Marks %</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={selectedLead.marksPercentage || ''}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, marksPercentage: e.target.value ? parseFloat(e.target.value) : undefined })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Course Selected</label>
+                      <input
+                        type="text"
+                        value={selectedLead.preferredCourse || ''}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                        placeholder="e.g. B.Tech CSE"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Budget Range (₹)</label>
+                      <input
+                        type="number"
+                        value={selectedLead.budget || ''}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, budget: e.target.value ? parseFloat(e.target.value) : undefined })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                        placeholder="Maximum Budget Limit"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">District / City</label>
-                    <input
-                      type="text"
-                      value={selectedLead.city || ''}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, city: e.target.value })}
+                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred College</label>
+                    <select
+                      value={selectedLead.preferredCollege || ''}
+                      disabled={isProfileLocked}
+                      onChange={(e) => setSelectedLead({ ...selectedLead, preferredCollege: e.target.value })}
                       className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                    />
+                    >
+                      <option value="">-- Select Target College --</option>
+                      {colleges.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Pipeline Stage</label>
+                      <select
+                        value={selectedLead.pipelineStage}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-800 dark:text-slate-200"
+                      >
+                        <option value="New">New Inquiries</option>
+                        <option value="Counselling">Under Counselling</option>
+                        <option value="DocPending">Documents Pending</option>
+                        <option value="Confirmed">Admissions Confirmed</option>
+                        <option value="Lost">Dropped/Lost</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase mb-1">Lead Source</label>
+                      <select
+                        value={selectedLead.source}
+                        disabled={isProfileLocked}
+                        onChange={(e) => setSelectedLead({ ...selectedLead, source: e.target.value })}
+                        className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-800 dark:text-slate-200"
+                      >
+                        <option value="Website">Website</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Walk-in">Walk-in</option>
+                        <option value="Google">Google</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Column 2: Academic & Workflow Details */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] text-blue-500 uppercase tracking-wider font-extrabold border-b pb-1">Academic & Onboarding</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Prior Qualification</label>
-                    <select
-                      value={selectedLead.qualification || ''}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, qualification: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
-                    >
-                      <option value="">-- Select --</option>
-                      <option value="10th Pass">10th Pass (Matric)</option>
-                      <option value="12th Pass - Science">12th Pass – Science (PCM/PCB)</option>
-                      <option value="12th Pass - Commerce">12th Pass – Commerce</option>
-                      <option value="12th Pass - Arts">12th Pass – Arts</option>
-                      <option value="Diploma">Diploma (3-year Polytechnic)</option>
-                      <option value="Graduation">Graduation (Any Stream)</option>
-                      <option value="B.Tech">B.Tech / B.E.</option>
-                      <option value="B.Sc">B.Sc</option>
-                      <option value="B.Com">B.Com</option>
-                      <option value="B.A.">B.A.</option>
-                      <option value="Post Graduation">Post Graduation</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Marks %</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={selectedLead.marksPercentage || ''}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, marksPercentage: e.target.value ? parseFloat(e.target.value) : undefined })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Course Selected</label>
-                    <input
-                      type="text"
-                      value={selectedLead.preferredCourse || ''}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, preferredCourse: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                      placeholder="e.g. B.Tech CSE"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Budget Range (₹)</label>
-                    <input
-                      type="number"
-                      value={selectedLead.budget || ''}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, budget: e.target.value ? parseFloat(e.target.value) : undefined })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                      placeholder="Maximum Budget Limit"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase mb-1">Preferred College</label>
-                  <select
-                    value={selectedLead.preferredCollege || ''}
-                    onChange={(e) => setSelectedLead({ ...selectedLead, preferredCollege: e.target.value })}
-                    className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                  >
-                    <option value="">-- Select Target College --</option>
-                    {colleges.map(c => (
-                      <option key={c.id} value={c.name}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Pipeline Stage</label>
-                    <select
-                      value={selectedLead.pipelineStage}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, pipelineStage: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-800 dark:text-slate-200"
-                    >
-                      <option value="New">New Inquiries</option>
-                      <option value="Counselling">Under Counselling</option>
-                      <option value="DocPending">Documents Pending</option>
-                      <option value="Confirmed">Admissions Confirmed</option>
-                      <option value="Lost">Dropped/Lost</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-400 uppercase mb-1">Lead Source</label>
-                    <select
-                      value={selectedLead.source}
-                      onChange={(e) => setSelectedLead({ ...selectedLead, source: e.target.value })}
-                      className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none font-normal text-slate-800 dark:text-slate-200"
-                    >
-                      <option value="Website">Website</option>
-                      <option value="Facebook">Facebook</option>
-                      <option value="WhatsApp">WhatsApp</option>
-                      <option value="Walk-in">Walk-in</option>
-                      <option value="Google">Google</option>
-                      <option value="Referral">Referral</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3: Guardian Details & Student Profile Metadata (Active only in Counselling stage or later) */}
-            {selectedLead.studentProfile && (
-              <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-4 space-y-3">
-                <h4 className="text-[10px] text-indigo-500 uppercase tracking-wider font-extrabold pb-1">Guardian, Identity Cards & Photos (Student Profile)</h4>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
-                  {/* Guardian Inputs */}
-                  <div className="space-y-3 md:col-span-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Father's / Guardian Name</label>
-                        <input
-                          type="text"
-                          value={selectedLead.studentProfile.parentName || ''}
-                          onChange={(e) => {
-                            const sp = { ...selectedLead.studentProfile, parentName: e.target.value };
-                            setSelectedLead({ ...selectedLead, parentName: e.target.value, studentProfile: sp });
-                          }}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                        />
+ 
+              {/* Section 3: Guardian Details & Student Profile Metadata (Active only in Counselling stage or later) */}
+              {selectedLead.studentProfile && (
+                <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-4 space-y-3">
+                  <h4 className="text-[10px] text-indigo-500 uppercase tracking-wider font-extrabold pb-1">Guardian, Identity Cards & Photos (Student Profile)</h4>
+ 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
+                    {/* Guardian Inputs */}
+                    <div className="space-y-3 md:col-span-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-slate-400 uppercase mb-1">Father's / Guardian Name</label>
+                          <input
+                            type="text"
+                            value={selectedLead.studentProfile.parentName || ''}
+                            disabled={isProfileLocked}
+                            onChange={(e) => {
+                              const sp = { ...selectedLead.studentProfile, parentName: e.target.value };
+                              setSelectedLead({ ...selectedLead, parentName: e.target.value, studentProfile: sp });
+                            }}
+                            className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 uppercase mb-1">Father's / Guardian Phone</label>
+                          <input
+                            type="text"
+                            value={selectedLead.studentProfile.parentPhone || ''}
+                            disabled={isProfileLocked}
+                            onChange={(e) => {
+                              const sp = { ...selectedLead.studentProfile, parentPhone: e.target.value };
+                              setSelectedLead({ ...selectedLead, studentProfile: sp });
+                            }}
+                            className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Father's / Guardian Phone</label>
-                        <input
-                          type="text"
-                          value={selectedLead.studentProfile.parentPhone || ''}
-                          onChange={(e) => {
-                            const sp = { ...selectedLead.studentProfile, parentPhone: e.target.value };
-                            setSelectedLead({ ...selectedLead, studentProfile: sp });
-                          }}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                        />
+ 
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="col-span-1">
+                          <label className="block text-[10px] text-slate-400 uppercase mb-1">Caste / Category</label>
+                          <select
+                            value={selectedLead.studentProfile.category || 'General'}
+                            disabled={isProfileLocked}
+                            onChange={(e) => {
+                              const sp = { ...selectedLead.studentProfile, category: e.target.value };
+                              setSelectedLead({ ...selectedLead, studentProfile: sp });
+                            }}
+                            className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
+                          >
+                            <option value="General">General</option>
+                            <option value="OBC">OBC</option>
+                            <option value="SC">SC</option>
+                            <option value="ST">ST</option>
+                            <option value="EWS">EWS</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 uppercase mb-1">Aadhar Number</label>
+                          <input
+                            type="text"
+                            value={selectedLead.studentProfile.aadharNo || ''}
+                            disabled={isProfileLocked}
+                            onChange={(e) => {
+                              const sp = { ...selectedLead.studentProfile, aadharNo: e.target.value };
+                              setSelectedLead({ ...selectedLead, studentProfile: sp });
+                            }}
+                            className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                            placeholder="12-digit UID"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 uppercase mb-1">PAN Card Number</label>
+                          <input
+                            type="text"
+                            value={selectedLead.studentProfile.panNo || ''}
+                            disabled={isProfileLocked}
+                            onChange={(e) => {
+                              const sp = { ...selectedLead.studentProfile, panNo: e.target.value };
+                              setSelectedLead({ ...selectedLead, studentProfile: sp });
+                            }}
+                            className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
+                            placeholder="10-character PAN"
+                          />
+                        </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="col-span-1">
-                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Caste / Category</label>
-                        <select
-                          value={selectedLead.studentProfile.category || 'General'}
-                          onChange={(e) => {
-                            const sp = { ...selectedLead.studentProfile, category: e.target.value };
-                            setSelectedLead({ ...selectedLead, studentProfile: sp });
-                          }}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-600 dark:text-slate-300"
-                        >
-                          <option value="General">General</option>
-                          <option value="OBC">OBC</option>
-                          <option value="SC">SC</option>
-                          <option value="ST">ST</option>
-                          <option value="EWS">EWS</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-400 uppercase mb-1">Aadhar Number</label>
-                        <input
-                          type="text"
-                          value={selectedLead.studentProfile.aadharNo || ''}
-                          onChange={(e) => {
-                            const sp = { ...selectedLead.studentProfile, aadharNo: e.target.value };
-                            setSelectedLead({ ...selectedLead, studentProfile: sp });
-                          }}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                          placeholder="12-digit UID"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-400 uppercase mb-1">PAN Card Number</label>
-                        <input
-                          type="text"
-                          value={selectedLead.studentProfile.panNo || ''}
-                          onChange={(e) => {
-                            const sp = { ...selectedLead.studentProfile, panNo: e.target.value };
-                            setSelectedLead({ ...selectedLead, studentProfile: sp });
-                          }}
-                          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded focus:outline-none focus:border-blue-500 font-normal text-slate-800 dark:text-slate-200"
-                          placeholder="10-character PAN"
-                        />
-                      </div>
-                    </div>
+ 
+                    {/* Photo & Signature Preview - inside studentProfile section */}
+                    {(() => {
+                      const photoUploading = uploadProgress['passport'] === 'Uploading';
+                      const signatureUploading = uploadProgress['signature'] === 'Uploading';
+                      const photoUrl = selectedLead.studentProfile?.docPhotoUrl;
+                      const signatureUrl = selectedLead.studentProfile?.docSignatureUrl;
+                      return (
+                        <div className="grid grid-cols-2 gap-2 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl">
+                          <div className="flex flex-col items-center justify-between border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950 min-h-[120px]">
+                            <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Photo</span>
+                            {photoUrl ? (
+                              <img
+                                src={`${API_URL}${photoUrl}`}
+                                alt="Student Photo"
+                                className="max-h-14 w-auto object-contain rounded"
+                              />
+                            ) : (
+                              <span className="text-[8px] text-slate-500 text-center font-normal mb-2">No photo uploaded</span>
+                            )}
+                            <button
+                              type="button"
+                              disabled={photoUploading || isProfileLocked}
+                              onClick={() => handleRealDocumentUpload('passport', selectedLead.id)}
+                              className={`w-full py-1 rounded text-[9px] font-bold transition mt-1 ${
+                                photoUploading || isProfileLocked
+                                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                  : 'bg-blue-600 hover:bg-blue-500 text-white'
+                              }`}
+                            >
+                              {photoUploading ? 'Uploading...' : 'Upload Photo'}
+                            </button>
+                          </div>
+                          <div className="flex flex-col items-center justify-between border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950 min-h-[120px]">
+                            <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Signature</span>
+                            {signatureUrl ? (
+                              <img
+                                src={`${API_URL}${signatureUrl}`}
+                                alt="Student Signature"
+                                className="max-h-14 w-auto object-contain"
+                              />
+                            ) : (
+                              <span className="text-[8px] text-slate-500 text-center font-normal mb-2">No signature uploaded</span>
+                            )}
+                            <button
+                              type="button"
+                              disabled={signatureUploading || isProfileLocked}
+                              onClick={() => handleRealDocumentUpload('signature', selectedLead.id)}
+                              className={`w-full py-1 rounded text-[9px] font-bold transition mt-1 ${
+                                signatureUploading || isProfileLocked
+                                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                  : 'bg-blue-600 hover:bg-blue-500 text-white'
+                              }`}
+                            >
+                              {signatureUploading ? 'Uploading...' : 'Upload Signature'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
-
-                  {/* Photo & Signature Preview - inside studentProfile section */}
-                  {(() => {
-                    const photoUploading = uploadProgress['passport'] === 'Uploading';
-                    const signatureUploading = uploadProgress['signature'] === 'Uploading';
-                    const photoUrl = selectedLead.studentProfile?.docPhotoUrl;
-                    const signatureUrl = selectedLead.studentProfile?.docSignatureUrl;
-                    return (
-                      <div className="grid grid-cols-2 gap-2 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl">
-                        <div className="flex flex-col items-center justify-between border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950 min-h-[120px]">
-                          <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Photo</span>
-                          {photoUrl ? (
-                            <img
-                              src={`${API_URL}${photoUrl}`}
-                              alt="Student Photo"
-                              className="max-h-14 w-auto object-contain rounded"
-                            />
-                          ) : (
-                            <span className="text-[8px] text-slate-500 text-center font-normal mb-2">No photo uploaded</span>
-                          )}
+                </div>
+              )}
+ 
+              {/* ── Photo & Signature Upload ── Always visible for all leads ── */}
+              {!selectedLead.studentProfile && (
+                <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-4">
+                  <h4 className="text-[10px] text-indigo-500 uppercase tracking-wider font-extrabold pb-3 flex items-center gap-1.5">
+                    <Upload size={11} /> Photo &amp; Signature
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Passport Photo */}
+                    {(() => {
+                      const photoUploading = uploadProgress['passport'] === 'Uploading';
+                      return (
+                        <div className="flex flex-col items-center gap-2 border border-dashed border-indigo-200 dark:border-indigo-900/60 rounded-xl p-3 bg-indigo-50/30 dark:bg-indigo-950/10 min-h-[140px] group hover:border-indigo-400 transition-all">
+                          <span className="text-[9px] text-indigo-500 uppercase font-extrabold tracking-wider flex items-center gap-1">
+                            <Eye size={9} /> Passport Photo
+                          </span>
+                          <div className="flex-1 flex items-center justify-center w-full">
+                            <div className="w-16 h-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-white dark:bg-slate-900 overflow-hidden">
+                              <span className="text-slate-300 dark:text-slate-700">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+                              </span>
+                            </div>
+                          </div>
                           <button
                             type="button"
-                            disabled={photoUploading}
+                            disabled={photoUploading || isProfileLocked}
                             onClick={() => handleRealDocumentUpload('passport', selectedLead.id)}
-                            className={`w-full py-1 rounded text-[9px] font-bold transition mt-1 ${photoUploading
-                              ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait'
-                              : 'bg-blue-600 hover:bg-blue-500 text-white'
-                              }`}
+                            className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${
+                              photoUploading || isProfileLocked
+                                ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm hover:shadow-indigo-300/30'
+                            }`}
                           >
+                            <Upload size={10} />
                             {photoUploading ? 'Uploading...' : 'Upload Photo'}
                           </button>
+                          <span className="text-[8px] text-slate-400 text-center">JPG, PNG or PDF • Max 2MB</span>
                         </div>
-                        <div className="flex flex-col items-center justify-between border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950 min-h-[120px]">
-                          <span className="text-[9px] text-slate-400 block mb-1 uppercase font-bold">Signature</span>
-                          {signatureUrl ? (
-                            <img
-                              src={`${API_URL}${signatureUrl}`}
-                              alt="Student Signature"
-                              className="max-h-14 w-auto object-contain"
-                            />
-                          ) : (
-                            <span className="text-[8px] text-slate-500 text-center font-normal mb-2">No signature uploaded</span>
-                          )}
+                      );
+                    })()}
+ 
+                    {/* Signature */}
+                    {(() => {
+                      const signatureUploading = uploadProgress['signature'] === 'Uploading';
+                      return (
+                        <div className="flex flex-col items-center gap-2 border border-dashed border-purple-200 dark:border-purple-900/60 rounded-xl p-3 bg-purple-50/30 dark:bg-purple-950/10 min-h-[140px] group hover:border-purple-400 transition-all">
+                          <span className="text-[9px] text-purple-500 uppercase font-extrabold tracking-wider flex items-center gap-1">
+                            <Edit3 size={9} /> Student Signature
+                          </span>
+                          <div className="flex-1 flex items-center justify-center w-full">
+                            <div className="w-full h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-white dark:bg-slate-900 overflow-hidden px-2">
+                              <span className="text-slate-300 dark:text-slate-700 italic font-serif text-base tracking-widest">Sign</span>
+                            </div>
+                          </div>
                           <button
                             type="button"
-                            disabled={signatureUploading}
+                            disabled={signatureUploading || isProfileLocked}
                             onClick={() => handleRealDocumentUpload('signature', selectedLead.id)}
-                            className={`w-full py-1 rounded text-[9px] font-bold transition mt-1 ${signatureUploading
-                              ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait'
-                              : 'bg-blue-600 hover:bg-blue-500 text-white'
-                              }`}
+                            className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${
+                              signatureUploading || isProfileLocked
+                                ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                : 'bg-purple-600 hover:bg-purple-500 text-white shadow-sm hover:shadow-purple-300/30'
+                            }`}
                           >
+                            <Upload size={10} />
                             {signatureUploading ? 'Uploading...' : 'Upload Signature'}
                           </button>
+                          <span className="text-[8px] text-slate-400 text-center">JPG, PNG or PDF • Max 2MB</span>
                         </div>
-                      </div>
-                    );
-                  })()}
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+ 
+              <div className="space-y-1 text-xs font-semibold">
+                <label className="block text-[10px] text-slate-400 uppercase">Counsellor Interaction Logs / Notes</label>
+                <textarea
+                  value={selectedLead.notes || ''}
+                  onChange={(e) => setSelectedLead({ ...selectedLead, notes: e.target.value })}
+                  rows={2}
+                  className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-lg focus:outline-none focus:border-blue-500 font-normal leading-relaxed"
+                  placeholder="Enter interaction history, student details, etc..."
+                />
+              </div>
+ 
+              <div className="flex justify-between items-center border-t pt-3">
+                <span className="text-[10px] text-slate-400 font-extrabold">AI Priority: {selectedLead.leadScore}/100</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextLead = { ...selectedLead, pipelineStage: 'DocPending' };
+                      setSelectedLead(nextLead);
+                      updateLeadDetails(selectedLead.id, nextLead);
+                    }}
+                    className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition"
+                  >
+                    Proceed to Documents
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
+                    className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition"
+                  >
+                    Save Profile
+                  </button>
                 </div>
               </div>
-            )}
-
-            {/* ── Photo & Signature Upload ── Always visible for all leads ── */}
-            {!selectedLead.studentProfile && (
-              <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-4">
-                <h4 className="text-[10px] text-indigo-500 uppercase tracking-wider font-extrabold pb-3 flex items-center gap-1.5">
-                  <Upload size={11} /> Photo &amp; Signature
-                </h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Passport Photo */}
-                  {(() => {
-                    const photoUploading = uploadProgress['passport'] === 'Uploading';
-                    return (
-                      <div className="flex flex-col items-center gap-2 border border-dashed border-indigo-200 dark:border-indigo-900/60 rounded-xl p-3 bg-indigo-50/30 dark:bg-indigo-950/10 min-h-[140px] group hover:border-indigo-400 transition-all">
-                        <span className="text-[9px] text-indigo-500 uppercase font-extrabold tracking-wider flex items-center gap-1">
-                          <Eye size={9} /> Passport Photo
-                        </span>
-                        <div className="flex-1 flex items-center justify-center w-full">
-                          <div className="w-16 h-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-white dark:bg-slate-900 overflow-hidden">
-                            <span className="text-slate-300 dark:text-slate-700">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          disabled={photoUploading}
-                          onClick={() => handleRealDocumentUpload('passport', selectedLead.id)}
-                          className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${photoUploading
-                            ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait'
-                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm hover:shadow-indigo-300/30'
-                            }`}
-                        >
-                          <Upload size={10} />
-                          {photoUploading ? 'Uploading...' : 'Upload Photo'}
-                        </button>
-                        <span className="text-[8px] text-slate-400 text-center">JPG, PNG or PDF • Max 2MB</span>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Signature */}
-                  {(() => {
-                    const signatureUploading = uploadProgress['signature'] === 'Uploading';
-                    return (
-                      <div className="flex flex-col items-center gap-2 border border-dashed border-purple-200 dark:border-purple-900/60 rounded-xl p-3 bg-purple-50/30 dark:bg-purple-950/10 min-h-[140px] group hover:border-purple-400 transition-all">
-                        <span className="text-[9px] text-purple-500 uppercase font-extrabold tracking-wider flex items-center gap-1">
-                          <Edit3 size={9} /> Student Signature
-                        </span>
-                        <div className="flex-1 flex items-center justify-center w-full">
-                          <div className="w-full h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-white dark:bg-slate-900 overflow-hidden px-2">
-                            <span className="text-slate-300 dark:text-slate-700 italic font-serif text-base tracking-widest">Sign</span>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          disabled={signatureUploading}
-                          onClick={() => handleRealDocumentUpload('signature', selectedLead.id)}
-                          className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 ${signatureUploading
-                            ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-wait'
-                            : 'bg-purple-600 hover:bg-purple-500 text-white shadow-sm hover:shadow-purple-300/30'
-                            }`}
-                        >
-                          <Upload size={10} />
-                          {signatureUploading ? 'Uploading...' : 'Upload Signature'}
-                        </button>
-                        <span className="text-[8px] text-slate-400 text-center">JPG, PNG or PDF • Max 2MB</span>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-1 text-xs font-semibold">
-              <label className="block text-[10px] text-slate-400 uppercase">Counsellor Interaction Logs / Notes</label>
-              <textarea
-                value={selectedLead.notes || ''}
-                onChange={(e) => setSelectedLead({ ...selectedLead, notes: e.target.value })}
-                rows={2}
-                className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-lg focus:outline-none focus:border-blue-500 font-normal leading-relaxed"
-                placeholder="Enter interaction history, student details, etc..."
-              />
             </div>
-
-            <div className="flex justify-between items-center border-t pt-3">
-              <span className="text-[10px] text-slate-400 font-extrabold">AI Priority: {selectedLead.leadScore}/100</span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextLead = { ...selectedLead, pipelineStage: 'DocPending' };
-                    setSelectedLead(nextLead);
-                    updateLeadDetails(selectedLead.id, nextLead);
-                  }}
-                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition"
-                >
-                  Proceed to Documents
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateLeadDetails(selectedLead.id, selectedLead)}
-                  className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition"
-                >
-                  Save Profile
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {activeModalTab === 'documents' && (
           <div className="space-y-4">

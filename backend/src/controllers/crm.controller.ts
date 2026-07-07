@@ -188,6 +188,73 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
     const { id } = req.params;
     const data = req.body;
 
+    const existingLead = await prisma.lead.findUnique({
+      where: { id }
+    });
+
+    if (!existingLead) {
+      return res.status(404).json({ error: 'Lead not found' });
+    }
+
+    const studentUser = await prisma.user.findFirst({
+      where: { email: existingLead.email, tenantId: existingLead.tenantId },
+      include: { studentProfile: true }
+    });
+    const existingProfile = studentUser?.studentProfile;
+
+    const isProfileFilled = !!(
+      existingProfile && (
+        existingProfile.aadharNo ||
+        existingProfile.panNo ||
+        existingProfile.parentName ||
+        existingProfile.parentPhone
+      )
+    );
+
+    const isCounsellor = req.user?.role === 'COUNSELLOR';
+
+    if (isProfileFilled && isCounsellor) {
+      const lockedFields = [
+        'name', 'phone', 'email', 'parentName', 'state', 'city', 
+        'qualification', 'marksPercentage', 'preferredCourse', 
+        'preferredCollege', 'budget', 'source'
+      ];
+
+      for (const field of lockedFields) {
+        const updatedValue = data[field];
+        const existingValue = (existingLead as any)[field];
+        
+        // Normalize values to avoid mismatch between null/undefined/empty string
+        const normUpdated = updatedValue === undefined || updatedValue === null ? '' : String(updatedValue).trim();
+        const normExisting = existingValue === undefined || existingValue === null ? '' : String(existingValue).trim();
+
+        if (updatedValue !== undefined && normUpdated !== normExisting) {
+          return res.status(403).json({ 
+            error: `This profile is locked for editing. You cannot modify the '${field}' field.` 
+          });
+        }
+      }
+
+      if (data.studentProfile && existingProfile) {
+        const profileLockedFields = [
+          'parentName', 'parentPhone', 'category', 'aadharNo', 'panNo'
+        ];
+        for (const field of profileLockedFields) {
+          const updatedValue = data.studentProfile[field];
+          const existingValue = (existingProfile as any)[field];
+
+          const normUpdated = updatedValue === undefined || updatedValue === null ? '' : String(updatedValue).trim();
+          const normExisting = existingValue === undefined || existingValue === null ? '' : String(existingValue).trim();
+
+          if (updatedValue !== undefined && normUpdated !== normExisting) {
+            return res.status(403).json({ 
+              error: `This profile is locked for editing. You cannot modify the student profile '${field}' field.` 
+            });
+          }
+        }
+      }
+    }
+
     // Destructure to remove ID, relations, and timestamps from database update data
     const {
       id: _,
