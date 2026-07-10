@@ -46,7 +46,8 @@ app.get('/health', async (req, res) => {
     await prisma.$runCommandRaw({ ping: 1 });
     res.status(200).json({ status: 'healthy', database: 'connected' });
   } catch (error: any) {
-    res.status(500).json({ status: 'unhealthy', error: error.message });
+    console.error('Health check database error:', error);
+    res.status(500).json({ status: 'unhealthy', error: 'Database connection failed' });
   }
 });
 
@@ -56,7 +57,7 @@ app.use('/api', apiRouter);
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Unhandled Error:', err);
-  res.status(500).json({ error: 'Internal Server Error', details: err.message });
+  res.status(500).json({ error: 'Internal Server Error' });
 });
 
 // Start Server

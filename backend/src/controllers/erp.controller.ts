@@ -14,7 +14,8 @@ export async function getUniversities(req: AuthenticatedRequest, res: Response) 
 
     return res.status(200).json(universities);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get universities error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -48,7 +49,8 @@ export async function createUniversity(req: AuthenticatedRequest, res: Response)
 
     return res.status(201).json(university);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create university error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -76,7 +78,8 @@ export async function updateUniversity(req: AuthenticatedRequest, res: Response)
 
     return res.status(200).json(university);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Update university error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -96,7 +99,8 @@ export async function getColleges(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json(colleges);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get colleges error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -137,7 +141,8 @@ export async function createCollege(req: AuthenticatedRequest, res: Response) {
 
     return res.status(201).json(college);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create college error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -152,7 +157,8 @@ export async function getCourses(req: AuthenticatedRequest, res: Response) {
     });
     return res.status(200).json(courses);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get courses error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -184,7 +190,8 @@ export async function createCourse(req: AuthenticatedRequest, res: Response) {
 
     return res.status(201).json(course);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create course error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -202,7 +209,8 @@ export async function getCollaborations(req: AuthenticatedRequest, res: Response
 
     return res.status(200).json(collaborations);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get collaborations error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -234,7 +242,8 @@ export async function createCollaboration(req: AuthenticatedRequest, res: Respon
 
     return res.status(201).json(collaboration);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create collaboration error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -261,7 +270,8 @@ export async function bookSeat(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json({ message: 'Seat booked successfully.', course: updatedCourse, status: 'booked' });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Book seat error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -297,7 +307,8 @@ export async function updateCollege(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json(college);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Update college error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -324,6 +335,7 @@ export async function updateCourse(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json(course);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Update course error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

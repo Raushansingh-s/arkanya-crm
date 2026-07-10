@@ -90,7 +90,8 @@ export async function getLeads(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json(leadsWithProfiles);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get leads error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -147,7 +148,8 @@ export async function createLead(req: AuthenticatedRequest, res: Response) {
 
     return res.status(201).json(lead);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create lead error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -179,7 +181,8 @@ export async function updateLeadStage(req: AuthenticatedRequest, res: Response) 
 
     return res.status(200).json(lead);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Update lead stage error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -319,7 +322,8 @@ export async function updateLead(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json(lead);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Update lead error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -343,7 +347,8 @@ export async function addFollowUp(req: AuthenticatedRequest, res: Response) {
 
     return res.status(201).json(followUp);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Add follow-up error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -357,7 +362,8 @@ export async function completeFollowUp(req: AuthenticatedRequest, res: Response)
 
     return res.status(200).json(followUp);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Complete follow-up error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -382,7 +388,8 @@ export async function getCounsellorStats(req: AuthenticatedRequest, res: Respons
       currentMonthCommission: confirmedAdmissions.length * 5000 // Mock 5000 INR per conversion
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get counsellor stats error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -420,6 +427,6 @@ export async function resetStudentPassword(req: AuthenticatedRequest, res: Respo
     return res.status(200).json({ message: 'Student password updated successfully.' });
   } catch (error: any) {
     console.error('Error resetting student password:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

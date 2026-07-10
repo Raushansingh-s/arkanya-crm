@@ -91,7 +91,7 @@ export async function login(req: AuthenticatedRequest, res: Response) {
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -183,7 +183,7 @@ export async function registerStudent(req: AuthenticatedRequest, res: Response) 
     });
   } catch (error: any) {
     console.error('Register error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -228,7 +228,8 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
       }
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get profile error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -267,7 +268,8 @@ export async function getUsers(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json(users);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get users error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -311,7 +313,8 @@ export async function createUser(req: AuthenticatedRequest, res: Response) {
       }
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create user error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -341,7 +344,8 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       }
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Update user error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -360,7 +364,8 @@ export async function deleteUser(req: AuthenticatedRequest, res: Response) {
 
     return res.status(200).json({ message: 'User account deleted successfully' });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Delete user error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -381,7 +386,8 @@ export async function resetUserPassword(req: AuthenticatedRequest, res: Response
 
     return res.status(200).json({ message: 'Password reset successfully' });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Reset password error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -489,6 +495,6 @@ export async function uploadDocument(req: AuthenticatedRequest, res: Response) {
     return res.status(200).json({ message: 'Document uploaded successfully', url: fileUrl });
   } catch (error: any) {
     console.error('Error uploading document:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

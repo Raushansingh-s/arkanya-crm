@@ -19,7 +19,8 @@ export async function getTransactions(req: AuthenticatedRequest, res: Response) 
 
     return res.status(200).json(transactions);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get transactions error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -54,7 +55,8 @@ export async function createTransaction(req: AuthenticatedRequest, res: Response
 
     return res.status(201).json(transaction);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Create transaction error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -98,7 +100,8 @@ export async function getProfitAndLoss(req: AuthenticatedRequest, res: Response)
       expenseCategories
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get profit and loss error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -182,6 +185,7 @@ export async function getCommissions(req: AuthenticatedRequest, res: Response) {
       counsellorCommissions: Object.values(counsellorCommissions)
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get commissions error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

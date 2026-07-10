@@ -169,6 +169,12 @@ export default function App() {
   const [accountingStats, setAccountingStats] = useState<any>(null);
   const [counsellorStats, setCounsellorStats] = useState<any>(null);
 
+  useEffect(() => {
+    if (counsellorStats) {
+      console.debug('Dashboard counsellor stats initialized:', counsellorStats);
+    }
+  }, [counsellorStats]);
+
   // College Management States
   const [collegeView, setCollegeView] = useState<'list' | 'detail' | 'add' | 'edit'>('list');
   const [selectedCollege, setSelectedCollege] = useState<College | null>(null);
@@ -368,29 +374,61 @@ export default function App() {
   };
 
   const fetchMasterData = async () => {
+    if (!currentUser) return;
     try {
       const headers = { Authorization: `Bearer ${authToken}` };
+      const role = currentUser.role;
 
-      const [leadsRes, uniRes, colRes, collabsRes, txRes, pnlRes, statsRes] = await Promise.all([
-        fetch(`${API_URL}/api/crm/leads`, { headers }),
-        fetch(`${API_URL}/api/erp/universities`, { headers }),
-        fetch(`${API_URL}/api/erp/colleges`, { headers }),
-        fetch(`${API_URL}/api/erp/collaborations`, { headers }),
-        fetch(`${API_URL}/api/accounting/transactions`, { headers }),
-        fetch(`${API_URL}/api/accounting/profit-loss`, { headers }),
-        fetch(`${API_URL}/api/crm/stats`, { headers })
-      ]);
+      // Determine authorization flags matching backend route guards
+      const canReadLeads = ['SUPERADMIN', 'DIRECTOR_ACADEMICS', 'COUNSELLOR'].includes(role);
+      const canReadERP = ['SUPERADMIN', 'DIRECTOR_ACADEMICS', 'DIRECTOR_LEGAL', 'COUNSELLOR'].includes(role);
+      const canReadCollabs = ['SUPERADMIN', 'DIRECTOR_FINANCE', 'DIRECTOR_LEGAL'].includes(role);
+      const canReadAccounting = ['SUPERADMIN', 'DIRECTOR_FINANCE', 'ACCOUNTANT'].includes(role);
+      const canReadStats = ['SUPERADMIN', 'DIRECTOR_ACADEMICS', 'COUNSELLOR'].includes(role);
 
-      if (leadsRes.ok) setLeads(await leadsRes.json());
-      if (uniRes.ok) setUniversities(await uniRes.json());
-      if (colRes.ok) setColleges(await colRes.json());
-      if (collabsRes.ok) setCollaborations(await collabsRes.json());
-      if (txRes.ok) setTransactions(await txRes.json());
-      if (pnlRes.ok) setAccountingStats(await pnlRes.json());
-      if (statsRes.ok) setCounsellorStats(await statsRes.json());
-      console.debug('Dashboard counsellor stats initialized:', counsellorStats);
+      const promises: Promise<any>[] = [];
+      const keys: string[] = [];
 
-      if (currentUser?.role === 'SUPERADMIN') {
+      if (canReadLeads) {
+        promises.push(fetch(`${API_URL}/api/crm/leads`, { headers }).then(r => r.ok ? r.json() : []));
+        keys.push('leads');
+      }
+      if (canReadERP) {
+        promises.push(fetch(`${API_URL}/api/erp/universities`, { headers }).then(r => r.ok ? r.json() : []));
+        keys.push('universities');
+        promises.push(fetch(`${API_URL}/api/erp/colleges`, { headers }).then(r => r.ok ? r.json() : []));
+        keys.push('colleges');
+      }
+      if (canReadCollabs) {
+        promises.push(fetch(`${API_URL}/api/erp/collaborations`, { headers }).then(r => r.ok ? r.json() : []));
+        keys.push('collaborations');
+      }
+      if (canReadAccounting) {
+        promises.push(fetch(`${API_URL}/api/accounting/transactions`, { headers }).then(r => r.ok ? r.json() : []));
+        keys.push('transactions');
+      }
+      if (canReadAccounting && ['SUPERADMIN', 'DIRECTOR_FINANCE'].includes(role)) {
+        promises.push(fetch(`${API_URL}/api/accounting/profit-loss`, { headers }).then(r => r.ok ? r.json() : null));
+        keys.push('pnl');
+      }
+      if (canReadStats) {
+        promises.push(fetch(`${API_URL}/api/crm/stats`, { headers }).then(r => r.ok ? r.json() : null));
+        keys.push('stats');
+      }
+
+      const results = await Promise.all(promises);
+      results.forEach((data, index) => {
+        const key = keys[index];
+        if (key === 'leads') setLeads(data);
+        else if (key === 'universities') setUniversities(data);
+        else if (key === 'colleges') setColleges(data);
+        else if (key === 'collaborations') setCollaborations(data);
+        else if (key === 'transactions') setTransactions(data);
+        else if (key === 'pnl') setAccountingStats(data);
+        else if (key === 'stats') setCounsellorStats(data);
+      });
+
+      if (role === 'SUPERADMIN') {
         const usersRes = await fetch(`${API_URL}/api/users`, { headers });
         if (usersRes.ok) setEmployeeUsers(await usersRes.json());
       }

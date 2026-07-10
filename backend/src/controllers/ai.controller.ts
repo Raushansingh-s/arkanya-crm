@@ -55,7 +55,8 @@ export async function getCollegeRecommendations(req: AuthenticatedRequest, res: 
 
     return res.status(200).json(recommendations.slice(0, 3));
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get college recommendations error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -115,7 +116,8 @@ export async function predictAdmissionChance(req: AuthenticatedRequest, res: Res
       }
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Predict admission chance error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -150,7 +152,8 @@ export async function getScholarships(req: AuthenticatedRequest, res: Response) 
 
     return res.status(200).json(scholarships);
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Get scholarships error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -182,7 +185,8 @@ export async function simulateDocumentVerification(req: AuthenticatedRequest, re
           }
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Simulate document verification error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
@@ -223,6 +227,7 @@ export async function chatAssistant(req: AuthenticatedRequest, res: Response) {
       autoWhatsAppDraft
     });
   } catch (error: any) {
-    return res.status(500).json({ error: error.message });
+    console.error('Chat assistant error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
